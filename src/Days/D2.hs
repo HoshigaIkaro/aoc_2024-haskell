@@ -8,9 +8,7 @@ run = do
     print $ part1 input
     print $ part2 input
 
-type Pair = (Int, Int)
-
-adjPair :: [Int] -> [Pair]
+adjPair :: [Int] -> [(Int, Int)]
 adjPair = zip <*> drop 1
 
 isSafe :: [Int] -> Bool
@@ -28,9 +26,9 @@ part1 :: String -> Int
 part1 = numSafeWith isSafe
 
 fixable :: [Int] -> Bool
-fixable xs = or [isSafe $ removedNth n | n <- [0 .. length xs - 1]]
+fixable xs = or [isSafe $ removed n | n <- [0 .. length xs - 1]]
   where
-    removedNth n = take n xs <> drop (succ n) xs
+    removed n = take n xs <> drop (succ n) xs
 
 part2 :: String -> Int
 part2 = numSafeWith $ liftA2 (||) isSafe fixable
