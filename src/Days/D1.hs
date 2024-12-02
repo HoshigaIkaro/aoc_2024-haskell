@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -Wno-x-partial #-}
 
-module MyLib (part1, part2) where
+module Days.D1 (run, part1, part2) where
 
 import Control.Arrow
 import Data.List (sort, transpose)
@@ -8,6 +8,12 @@ import Data.List (sort, transpose)
 import Data.Map (Map)
 import Data.Map qualified as M
 import Data.Maybe (fromMaybe)
+
+run :: IO ()
+run = do
+    input <- readFile "input/d1.txt"
+    print $ part1 input
+    print $ part2 input
 
 pToList :: String -> [[Int]]
 pToList = transpose . map (map read . words) . lines

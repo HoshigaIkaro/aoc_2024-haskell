@@ -57,11 +57,15 @@ library
     -- Import common warning flags.
     import:           warnings
 
+    ghc-options: -threaded
+
     -- Modules exported by the library.
-    exposed-modules:  MyLib
+    exposed-modules:  Days
 
     -- Modules included in this library but not exported.
-    -- other-modules:
+    other-modules:
+        Days.D1
+        Days.D2
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -75,9 +79,11 @@ library
     -- Base language which the package is written in.
     default-language: GHC2024
 
-executable aoc2024
+executable cli
     -- Import common warning flags.
     import:           warnings
+
+    ghc-options: -threaded -rtsopts
 
     -- .hs or .lhs file containing the Main module.
     main-is:          Main.hs
