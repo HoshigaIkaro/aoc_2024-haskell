@@ -4,13 +4,13 @@
 module Days.D3 (run, part1, part2) where
 
 import Control.Monad (void)
-import Data.Either
+import Data.Either (fromRight, rights)
 import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Void (Void)
-import Replace.Megaparsec
-import Text.Megaparsec
-import Text.Megaparsec.Char
+import Replace.Megaparsec (sepCap)
+import Text.Megaparsec (Parsec, runParser, (<|>))
+import Text.Megaparsec.Char (char, string)
 import Text.Megaparsec.Char.Lexer qualified as L
 
 type Parser = Parsec Void Text
