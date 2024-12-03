@@ -72,7 +72,11 @@ library
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.20.0.0, containers, text, megaparsec
+    build-depends:    base ^>=4.20.0.0
+                    , containers
+                    , text
+                    , megaparsec
+                    , replace-megaparsec
 
     -- Directories containing source files.
     hs-source-dirs:   src
