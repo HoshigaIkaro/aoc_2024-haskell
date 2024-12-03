@@ -29,10 +29,10 @@ pPair = do
     pure (a, b)
 
 pMulPair :: Parser (Int, Int)
-pMulPair = lookAhead ((string "mul") *> parentheses pPair) *> ((string "mul") *> parentheses pPair) <* (void (many anyChar) <|> eof)
+pMulPair = lookAhead (string "mul" *> parentheses pPair) *> (string "mul" *> parentheses pPair) <* (void (many anyChar) <|> eof)
 
 anyChar :: Parser ()
-anyChar = (void asciiChar <|> void (char ' ') <|> (void symbolChar))
+anyChar = void asciiChar <|> void (char ' ') <|> void symbolChar
 
 lexeme :: Parser a -> Parser a
 lexeme = L.lexeme (void $ many anyChar)
