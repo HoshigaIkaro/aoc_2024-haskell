@@ -50,7 +50,7 @@ diagonals b = combinedLeft <> combinedRight
     upRightFrom = takeWhile (\(r, c) -> r >= 0 && c < width) . iterate (pred *** succ)
     upLeftFrom = takeWhile (\(r, c) -> r >= 0 && c >= 0) . iterate (pred *** pred)
     combinedLeft = map (T.concat . map (mapping M.!) . upRightFrom) (lMostPoints <> drop 1 bMostPoints)
-    combinedRight = map (T.concat . map (mapping M.!) . upLeftFrom) (rMostPoints <> drop 1 (reverse bMostPoints))
+    combinedRight = map (T.concat . map (mapping M.!) . upLeftFrom) (rMostPoints <> init bMostPoints)
 
 allLines :: Board -> [Text]
 allLines b = combined <> map T.reverse combined
@@ -64,8 +64,8 @@ pBoard s = Board{bMap = mapping, bWidth = width, bHeight = height}
     height = length ls
     width = length (head ls)
     allPointsInRow row = [(row, col) | col <- [0 .. width - 1]]
-    f row rowStr = zip (allPointsInRow row) $ map T.singleton rowStr
-    mapping = M.fromList $ concat $ zipWith f [0 .. height - 1] ls
+    f row = zip (allPointsInRow row) . map T.singleton
+    mapping = M.fromList . concat $ zipWith f [0 .. height - 1] ls
 
 part1 :: String -> Int
 part1 = sum . map (T.count "XMAS") . allLines . pBoard

@@ -57,13 +57,14 @@ library
     -- Import common warning flags.
     import:           warnings
 
-    ghc-options: -threaded
+    ghc-options:    -threaded
 
     -- Modules exported by the library.
-    exposed-modules:  Days
+    exposed-modules:  
+        Days
 
     -- Modules included in this library but not exported.
-    other-modules:
+    -- other-modules:
         Days.D1
         Days.D2
         Days.D3
@@ -84,6 +85,20 @@ library
 
     -- Base language which the package is written in.
     default-language: GHC2024
+
+benchmark lib-bench
+    type:             exitcode-stdio-1.0
+
+    hs-source-dirs:   benches
+
+    main-is:          Bench.hs
+
+    default-language: GHC2024
+
+    build-depends:
+        base ^>=4.20.0.0,
+        aoc2024,
+        criterion
 
 executable cli
     -- Import common warning flags.

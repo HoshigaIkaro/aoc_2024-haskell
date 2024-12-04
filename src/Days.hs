@@ -1,6 +1,8 @@
 {-# OPTIONS_GHC -Wno-x-partial #-}
 
-module Days (runDay) where
+module Days (
+    module Days,
+) where
 
 import Days.D1 qualified as D1
 import Days.D2 qualified as D2
