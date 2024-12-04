@@ -70,6 +70,7 @@ pBoard s = Board{bMap = mapping, bWidth = width, bHeight = height}
 part1 :: String -> Int
 part1 = sum . map (T.count "XMAS") . allLines . pBoard
 
+-- | Assume only used for checking when the center point is an "A"
 orientations :: [[(Point -> Point, Text)]]
 orientations = [one, two, three, four]
   where
@@ -77,10 +78,10 @@ orientations = [one, two, three, four]
     upRight = pred *** succ
     downLeft = succ *** pred
     downRight = succ *** succ
-    one = [(upLeft, "M"), (upRight, "S"), (id, "A"), (downLeft, "M"), (downRight, "S")]
-    two = [(upLeft, "M"), (upRight, "M"), (id, "A"), (downLeft, "S"), (downRight, "S")]
-    three = [(upLeft, "S"), (upRight, "M"), (id, "A"), (downLeft, "S"), (downRight, "M")]
-    four = [(upLeft, "S"), (upRight, "S"), (id, "A"), (downLeft, "M"), (downRight, "M")]
+    one = [(upLeft, "M"), (upRight, "S"), (downLeft, "M"), (downRight, "S")]
+    two = [(upLeft, "M"), (upRight, "M"), (downLeft, "S"), (downRight, "S")]
+    three = [(upLeft, "S"), (upRight, "M"), (downLeft, "S"), (downRight, "M")]
+    four = [(upLeft, "S"), (upRight, "S"), (downLeft, "M"), (downRight, "M")]
 
 xmasHere :: Board -> Point -> Bool
 xmasHere board center
