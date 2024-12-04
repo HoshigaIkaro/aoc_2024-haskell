@@ -1,29 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-x-partial #-}
 
-module Days.D4 where
+module Days.D4 (run, part1, part2) where
 
-import Control.Arrow
-import Data.Function
-import Data.List
+import Control.Arrow (Arrow (first, (***)))
 import Data.Map (Map)
 import Data.Map qualified as M
 import Data.Text (Text)
 import Data.Text qualified as T
-
--- type Parser = Parsec Void Text
-
--- pXMAS :: Parser Int
--- pXMAS = string "XMAS"
 
 run :: IO ()
 run = do
     input <- readFile "input/d4.txt"
     print $ part1 input
     print $ part2 input
-
-numXMAS :: Text -> Int
-numXMAS = T.count ("XMAS")
 
 type Point = (Int, Int)
 
@@ -39,14 +29,14 @@ rows b = map f [0 .. height - 1]
   where
     mapping = bMap b
     height = bHeight b
-    f row = T.concat . map snd . sortBy (compare `on` fst) . M.toList $ M.filterWithKey (\(r, _) _ -> row == r) mapping
+    f row = T.concat . M.elems $ M.filterWithKey (\(r, _) _ -> row == r) mapping
 
 cols :: Board -> [Text]
 cols b = map f [0 .. width - 1]
   where
     mapping = bMap b
     width = bWidth b
-    f col = T.concat . map snd . sortBy (compare `on` fst) . M.toList $ M.filterWithKey (\(_, c) _ -> col == c) mapping
+    f col = T.concat . M.elems $ M.filterWithKey (\(_, c) _ -> col == c) mapping
 
 diagonals :: Board -> [Text]
 diagonals b = combinedLeft <> combinedRight
@@ -54,13 +44,13 @@ diagonals b = combinedLeft <> combinedRight
     mapping = bMap b
     width = bWidth b
     height = bHeight b
-    leftMostPoints = [(row, 0) | row <- [0 .. height - 1]]
-    rightMostPoints = [(row, width - 1) | row <- [0 .. height - 1]]
-    bottomMostPoints = [(height - 1, col) | col <- [0 .. width - 1]]
-    upRightPointsFrom = takeWhile (\(r, c) -> r >= 0 && c < width) . iterate (pred *** succ)
-    upLeftPointsFrom = takeWhile (\(r, c) -> r >= 0 && c >= 0) . iterate (pred *** pred)
-    combinedLeft = map (T.concat . map (\p -> mapping M.! p) . upRightPointsFrom) (leftMostPoints <> drop 1 bottomMostPoints)
-    combinedRight = map (T.concat . map (\p -> mapping M.! p) . upLeftPointsFrom) (rightMostPoints <> drop 1 (reverse bottomMostPoints))
+    lMostPoints = [(row, 0) | row <- [0 .. height - 1]]
+    rMostPoints = [(row, width - 1) | row <- [0 .. height - 1]]
+    bMostPoints = [(height - 1, col) | col <- [0 .. width - 1]]
+    upRightFrom = takeWhile (\(r, c) -> r >= 0 && c < width) . iterate (pred *** succ)
+    upLeftFrom = takeWhile (\(r, c) -> r >= 0 && c >= 0) . iterate (pred *** pred)
+    combinedLeft = map (T.concat . map (mapping M.!) . upRightFrom) (lMostPoints <> drop 1 bMostPoints)
+    combinedRight = map (T.concat . map (mapping M.!) . upLeftFrom) (rMostPoints <> drop 1 (reverse bMostPoints))
 
 allLines :: Board -> [Text]
 allLines b = combined <> map T.reverse combined
@@ -98,7 +88,8 @@ xmasHere board center
     | otherwise = False
   where
     mapping = bMap board
-    works = all (\(point, symb) -> mapping M.! point == symb) . map (first ($ center))
+    matches = (==) . (mapping M.!)
+    works = all (uncurry matches . first ($ center))
 
 part2 :: String -> Int
 part2 s = length . filter id $ map (xmasHere board) possiblePoints
