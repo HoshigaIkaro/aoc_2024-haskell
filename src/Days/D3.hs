@@ -36,6 +36,13 @@ pMulPair = string "mul" *> pPair
 pAllPairs :: Parser [Either Text (Int, Int)]
 pAllPairs = sepCap pMulPair
 
+-- Figured out Megaparsec for part 1
+-- pAllPairs :: Parser [(Int, Int)]
+-- pAllPairs = many (try $ skipManyTill anySingle (try pMulPair))
+
+-- part1 :: String -> Int
+-- part1 = sum . map (uncurry (*)) . fromRight [] . runParser pAllPairs "" . T.pack
+
 part1 :: String -> Int
 part1 = sum . map (uncurry (*)) . rights . fromRight [] . runParser pAllPairs "" . T.pack
 
