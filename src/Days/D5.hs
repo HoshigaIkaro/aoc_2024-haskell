@@ -23,6 +23,13 @@ pRules = foldr processLine M.empty . T.lines
     updateRules (smaller, larger) = M.alter (maybe (Just [smaller]) (Just . (smaller :))) larger
     processLine = updateRules . toTuple . map (read . T.unpack) . T.split (== '|')
 
+pRulesAlt :: Text -> Map (Int, Int) Ordering
+pRulesAlt = foldr processLine M.empty . T.lines
+  where
+    toTuple lst = (head lst, lst !! 1)
+    updateRules = flip M.insert LT
+    processLine = updateRules . toTuple . map (read . T.unpack) . T.split (== '|')
+
 pUpdate :: Text -> [Int]
 pUpdate = map (read . T.unpack) . T.split (== ',')
 
@@ -33,6 +40,19 @@ pInput s = (rules, updates)
     halves = T.splitOn "\n\n" t
     rules = pRules (head halves)
     updates = map pUpdate (T.lines $ last halves)
+
+pInputAlt :: String -> (Map (Int, Int) Ordering, [[Int]])
+pInputAlt s = (rules, updates)
+  where
+    t = T.pack s
+    halves = T.splitOn "\n\n" t
+    rules = pRulesAlt (head halves)
+    updates = map pUpdate (T.lines $ last halves)
+
+updateIsCorrectAlt :: Map (Int, Int) Ordering -> [Int] -> Bool
+updateIsCorrectAlt mapping lst = all f $ zip lst (drop 1 lst)
+  where
+    f (a, b) = M.notMember (b, a) mapping
 
 updateIsCorrect :: Map Int [Int] -> [Int] -> Bool
 updateIsCorrect _ [] = True
@@ -60,17 +80,12 @@ fixUpdate mapping (x : xs)
     greatestIndex = maximum $ mapMaybe (`elemIndex` xs) smallerThanX
     updatedList = take (greatestIndex + 1) xs <> [x] <> drop (greatestIndex + 1) xs
 
-fixUpdateAlt :: Map Int [Int] -> [Int] -> [Int]
+fixUpdateAlt :: Map (Int, Int) Ordering -> [Int] -> [Int]
 fixUpdateAlt mapping = sortBy sortFunc
   where
-    sortFunc a b = case M.lookup a mapping of
-        Nothing -> LT
-        Just smallerThanA ->
-            if b `elem` smallerThanA
-                then GT
-                else LT
+    sortFunc a b = maybe GT id (M.lookup (a, b) mapping)
 
 part2 :: String -> Int
-part2 s = sum . map (middleNumber . fixUpdateAlt rules) . filter (not . updateIsCorrect rules) $ updates
+part2 s = sum . map (middleNumber . fixUpdateAlt rules) . filter (not . updateIsCorrectAlt rules) $ updates
   where
-    (rules, updates) = pInput s
+    (rules, updates) = pInputAlt s
