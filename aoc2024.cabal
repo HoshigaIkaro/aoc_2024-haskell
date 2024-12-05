@@ -69,6 +69,7 @@ library
         Days.D2
         Days.D3
         Days.D4
+        Days.D5
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
