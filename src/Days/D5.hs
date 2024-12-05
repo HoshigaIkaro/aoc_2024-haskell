@@ -36,17 +36,20 @@ pInput s = (rules, updates)
 
 updateIsCorrect :: Map Int [Int] -> [Int] -> Bool
 updateIsCorrect _ [] = True
-updateIsCorrect mapping (x : xs) = all (`notElem` xs) (fromMaybe [] $ M.lookup x mapping) && updateIsCorrect mapping xs
+updateIsCorrect mapping (x : xs) = noInvalidInRemaining && updateIsCorrect mapping xs
+  where
+    noInvalidInRemaining = all (`notElem` xs) (fromMaybe [] $ M.lookup x mapping)
 
 middleNumber :: [Int] -> Int
-middleNumber l = l !! mid
+middleNumber lst = lst !! mid
   where
-    mid = length l `div` 2
+    mid = length lst `div` 2
 
 part1 :: String -> Int
 part1 s = sum . map middleNumber . filter (updateIsCorrect rules) $ updates
   where
     (rules, updates) = pInput s
+
 fixUpdate :: Map Int [Int] -> [Int] -> [Int]
 fixUpdate _ [] = []
 fixUpdate mapping (x : xs)
