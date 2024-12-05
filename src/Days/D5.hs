@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# OPTIONS_GHC -Wno-x-partial #-}
+{-# OPTIONS_GHC -Wno-x-partial -Wno-unused-top-binds #-}
 
 module Days.D5 (run, part1, part2) where
 
@@ -60,7 +60,17 @@ fixUpdate mapping (x : xs)
     greatestIndex = maximum $ mapMaybe (`elemIndex` xs) smallerThanX
     updatedList = take (greatestIndex + 1) xs <> [x] <> drop (greatestIndex + 1) xs
 
+fixUpdateAlt :: Map Int [Int] -> [Int] -> [Int]
+fixUpdateAlt mapping = sortBy sortFunc
+  where
+    sortFunc a b = case M.lookup a mapping of
+        Nothing -> LT
+        Just smallerThanA ->
+            if b `elem` smallerThanA
+                then GT
+                else LT
+
 part2 :: String -> Int
-part2 s = sum . map (middleNumber . fixUpdate rules) . filter (not . updateIsCorrect rules) $ updates
+part2 s = sum . map (middleNumber . fixUpdateAlt rules) . filter (not . updateIsCorrect rules) $ updates
   where
     (rules, updates) = pInput s
