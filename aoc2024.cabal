@@ -70,6 +70,7 @@ library
         Days.D3
         Days.D4
         Days.D5
+        Days.D6
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -80,6 +81,8 @@ library
                     , text
                     , megaparsec
                     , replace-megaparsec
+                    , parallel
+                    , deepseq
 
     -- Directories containing source files.
     hs-source-dirs:   src
