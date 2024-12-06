@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-x-partial #-}
+
 module Days.D6 (run, part1, part2) where
 
 import Control.Arrow
@@ -40,7 +42,7 @@ pInput s =
   where
     ls = lines s
     height = length ls
-    width = length $ ls !! 0
+    width = length $ head ls
     pDirection '^' = UP
     pDirection 'v' = DOWN
     pDirection '>' = RIGHT
@@ -49,7 +51,7 @@ pInput s =
         | char == '.' = (acc, mGuard)
         | char == '#' = (S.insert point acc, mGuard)
         | otherwise = (acc, Just (point, pDirection char))
-    foldRow (row, rowNum) (acc, mGuard) = foldr f (acc, mGuard) . map (second (rowNum,)) $ zip row [0 ..]
+    foldRow (row, rowNum) (acc, mGuard) = foldr (f . second (rowNum,)) (acc, mGuard) $ zip row [0 ..]
     (walls, dir) = foldr foldRow (S.empty, Nothing) $ zip ls [0 ..]
 
 getMove :: Direction -> ((Int, Int) -> (Int, Int))
@@ -174,7 +176,6 @@ part2 :: String -> Int
 -- part2 s = go newBoards
 part2 s = sum $ map (f . isCycle) newBoards
   where
-
     -- part2 s = [b] <> newBoards
 
     b = pInput s
