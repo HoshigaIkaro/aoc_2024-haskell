@@ -10,6 +10,7 @@ import Days.D3 qualified as D3
 import Days.D4 qualified as D4
 import Days.D5 qualified as D5
 import Days.D6 qualified as D6
+import Days.D7 qualified as D7
 
 runDay :: Int -> IO ()
 runDay day = case day of
@@ -19,4 +20,5 @@ runDay day = case day of
     4 -> D4.run
     5 -> D5.run
     6 -> D6.run
+    7 -> D7.run
     _ -> pure ()

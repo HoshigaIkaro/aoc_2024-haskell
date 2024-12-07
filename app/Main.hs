@@ -7,5 +7,5 @@ main :: IO ()
 main = do
     args <- getArgs
     if length args == 0
-        then runDay 6
+        then runDay 7
         else runDay $ read $ args !! 0
