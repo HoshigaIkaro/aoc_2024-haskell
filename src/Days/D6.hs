@@ -106,13 +106,25 @@ isCycle b = go direction position S.empty
       where
         newPoint = getMove dir point
 
-nextWall :: Set Point -> Point -> Direction -> Maybe Point
+nextWall :: Walls -> Point -> Direction -> Maybe Point
 nextWall walls (row, col) dir
     | dir == UP = fmap snd $ unsnoc $ sort (S.toList $ S.filter (\(newRow, newCol) -> newRow < row && newCol == col) walls)
     | dir == DOWN = fmap fst $ uncons $ sort (S.toList $ S.filter (\(newRow, newCol) -> newRow > row && newCol == col) walls)
     | dir == LEFT = fmap snd $ unsnoc $ sort (S.toList $ S.filter (\(newRow, newCol) -> newRow == row && newCol < col) walls)
     | dir == RIGHT = fmap fst $ uncons $ sort (S.toList $ S.filter (\(newRow, newCol) -> newRow == row && newCol > col) walls)
     | otherwise = Nothing
+
+nextPoint :: Walls -> Point -> Direction -> Maybe Point
+nextPoint walls point dir = nextWall walls point dir >>= pure . getOppositeMove dir
+
+isLoop :: Set Point -> Set (Point, Direction) -> Point -> Direction -> Maybe Bool
+isLoop walls visited point dir = do
+    let newDir = nextDir dir
+    newPoint <- nextPoint walls point dir
+    let newState = (newPoint, newDir)
+    if newState `S.member` visited
+        then pure True
+        else isLoop walls (S.insert newState visited) newPoint newDir
 
 findCycles :: Board -> Set Point
 findCycles b = go direction position
@@ -171,20 +183,26 @@ findCycles b = go direction position
 --       where
 --         newPoint = getMove dir point
 
-part2 :: String -> Int
+-- part2 :: String -> Int
 -- part2 s = S.size $ findCycles b
--- part2 s = go newBoards
-part2 s = sum $ map (f . isCycle) newBoards
+part2 s = length $ filter (\w -> fromMaybe False $ uncurry (isLoop w S.empty) (bGuard b)) newWallSets
   where
+    -- part2 s = go newBoards
+    -- part2 s = sum $ map (f . isCycle) newBoards
+
     -- part2 s = [b] <> newBoards
+    g (point, dir) = isLoop (S.union (bWalls b) (S.singleton point)) S.empty point dir
 
     b = pInput s
     -- newBoards = (\p -> b{bWalls = S.insert p $ bWalls b})
-    movementPoints = moveGuardUntilLeave b
+    movementPointsAndDir = moveGuardUntilLeave b
+    movementPoints = S.map fst movementPointsAndDir
     height = bHeight b
     width = bWidth b
     inBounds (row, col) = inRange (0, height - 1) row && inRange (0, width - 1) col
-    possibleBlockPoints = S.toList $ S.filter inBounds $ S.map (\(point, dir) -> getMove dir point) movementPoints
+    possibleBlockPoints = S.toList $ S.filter inBounds $ S.map (\(point, dir) -> getMove dir point) movementPointsAndDir
+    -- possibleWallPoints = S.map fst movementPointsAndDir
+    newWallSets = S.toList $  S.map ((\(p, d) -> S.insert (getMove d p) (bWalls b))) movementPointsAndDir
     newBoards = map (\p -> b{bWalls = S.insert p $ bWalls b}) possibleBlockPoints
     f True = 1
     f False = 0
