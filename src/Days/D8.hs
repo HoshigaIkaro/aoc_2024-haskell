@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-x-partial #-}
+
 module Days.D8 (run, part1, part2) where
 
 import Control.Arrow
@@ -16,58 +18,49 @@ type Point = (Int, Int)
 
 type Antennas = [Point]
 
-data Board = Board {aBF :: [Antennas], bWidth :: Int, bHeight :: Int} deriving (Show, Eq, Ord)
+type InBoundsFunc = (Point -> Bool)
 
--- pInput :: String -> Board
-pInput s = Board{aBF = map (map snd) allAntennas, bWidth = width, bHeight = height}
+pInput :: String -> ([Antennas], InBoundsFunc)
+pInput s = (map (map snd) allAntennas, inBounds)
   where
     ls = lines s
     height = length ls
     width = length $ head ls
+    inBounds (row, col) = inRange (0, height - 1) row && inRange (0, width - 1) col
     allPointsInRow row = [(row, col) | col <- [0 .. width - 1]]
     f row = filter ((/= '.') . fst) . flip zip (allPointsInRow row)
     allAntennas = groupBy (\a b -> fst a == fst b) . sortBy (compare `on` fst) . concat $ zipWith f [0 .. height - 1] ls
 
-findAntinodesBetween :: Board -> Point -> Point -> [Point]
-findAntinodesBetween b pA pB = filter inBounds [possiblePoint1, possiblePoint2]
+type FindAntinodeFunc = InBoundsFunc -> (Point, Point) -> [Point]
+
+findAntinodesBetween :: FindAntinodeFunc
+findAntinodesBetween inBounds (pA, pB) = filter inBounds [possiblePoint1, possiblePoint2]
   where
-    width = bWidth b
-    height = bHeight b
-    inBounds (row, col) = inRange (0, height - 1) row && inRange (0, width - 1) col
     deltaX = snd pB - snd pA
     deltaY = fst pB - fst pA
     possiblePoint1 = (subtract deltaY *** subtract deltaX) pA
     possiblePoint2 = ((+ deltaY) *** (+ deltaX)) pB
 
-findAllAntinodesForFreq :: Board -> Antennas -> [Point]
-findAllAntinodesForFreq b antennas = concatMap (uncurry (findAntinodesBetween b)) $ antennaCombos antennas
+findAllForFreqWith :: InBoundsFunc -> FindAntinodeFunc -> Antennas -> [Point]
+findAllForFreqWith inBounds findAntinodeFunc antennas = concatMap (findAntinodeFunc inBounds) $ antennaCombos antennas
   where
     antennaCombos [] = []
     antennaCombos (x : xs) = [(x, y) | y <- xs] <> antennaCombos xs
 
 part1 :: String -> Int
-part1 s = length $ S.toList $ S.fromList $ concatMap (findAllAntinodesForFreq b) (aBF b)
+part1 s = length $ S.toList $ S.fromList $ concatMap (findAllForFreqWith inBounds findAntinodesBetween) antennasByFreq
   where
-    b = pInput s
+    (antennasByFreq, inBounds) = pInput s
 
-findAntinodesBetween' :: Board -> Point -> Point -> [Point]
-findAntinodesBetween' b pA pB = filter inBounds possiblePoints1 <> possiblePoints2
+findAntinodesBetweenV2 :: FindAntinodeFunc
+findAntinodesBetweenV2 inBounds (pA, pB) = filter inBounds possiblePoints1 <> possiblePoints2
   where
-    width = bWidth b
-    height = bHeight b
-    inBounds (row, col) = inRange (0, height - 1) row && inRange (0, width - 1) col
     deltaX = snd pB - snd pA
     deltaY = fst pB - fst pA
     possiblePoints1 = takeWhile inBounds $ iterate (subtract deltaY *** subtract deltaX) pA
     possiblePoints2 = takeWhile inBounds $ iterate ((+ deltaY) *** (+ deltaX)) pB
 
-findAllAntinodesForFreq' :: Board -> Antennas -> [Point]
-findAllAntinodesForFreq' b antennas = concatMap (uncurry (findAntinodesBetween' b)) $ antennaCombos antennas
-  where
-    antennaCombos [] = []
-    antennaCombos (x : xs) = [(x, y) | y <- xs] <> antennaCombos xs
-
 part2 :: String -> Int
-part2 s =  length $ S.toList $ S.fromList $ concatMap (findAllAntinodesForFreq' b) (aBF b)
+part2 s = length $ S.toList $ S.fromList $ concatMap (findAllForFreqWith inBounds findAntinodesBetweenV2) antennasByFreq
   where
-    b = pInput s
+    (antennasByFreq, inBounds) = pInput s
