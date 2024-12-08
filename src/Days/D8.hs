@@ -48,12 +48,12 @@ findAllForFreqWith inBounds findAntinodeFunc antennas = concatMap (findAntinodeF
     antennaCombos (x : xs) = [(x, y) | y <- xs] <> antennaCombos xs
 
 part1 :: String -> Int
-part1 s = length $ S.toList $ S.fromList $ concatMap (findAllForFreqWith inBounds findAntinodesBetween) antennasByFreq
+part1 s = S.size $ S.fromList $ concatMap (findAllForFreqWith inBounds findAntinodesBetween) antennasByFreq
   where
     (antennasByFreq, inBounds) = pInput s
 
 findAntinodesBetweenV2 :: FindAntinodeFunc
-findAntinodesBetweenV2 inBounds (pA, pB) = filter inBounds possiblePoints1 <> possiblePoints2
+findAntinodesBetweenV2 inBounds (pA, pB) = possiblePoints1 <> possiblePoints2
   where
     deltaX = snd pB - snd pA
     deltaY = fst pB - fst pA
@@ -61,6 +61,6 @@ findAntinodesBetweenV2 inBounds (pA, pB) = filter inBounds possiblePoints1 <> po
     possiblePoints2 = takeWhile inBounds $ iterate ((+ deltaY) *** (+ deltaX)) pB
 
 part2 :: String -> Int
-part2 s = length $ S.toList $ S.fromList $ concatMap (findAllForFreqWith inBounds findAntinodesBetweenV2) antennasByFreq
+part2 s = S.size $ S.fromList $ concatMap (findAllForFreqWith inBounds findAntinodesBetweenV2) antennasByFreq
   where
     (antennasByFreq, inBounds) = pInput s
