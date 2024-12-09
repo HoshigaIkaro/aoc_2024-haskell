@@ -7,7 +7,7 @@ import Data.Maybe
 import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Void (Void)
-import GHC.Float.RealFracMethods (ceilingDoubleInt, floorDoubleInt)
+import GHC.Float.RealFracMethods (floorDoubleInt)
 import Text.Megaparsec
 import Text.Megaparsec.Char (space, string)
 import Text.Megaparsec.Char.Lexer qualified as L
