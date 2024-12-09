@@ -22,7 +22,7 @@ pInput = go M.empty 0 0 True
     go :: Map Int Int -> Int -> Int -> Bool -> String -> Map Int Int
     go mapping _ _ _ [] = mapping
     go mapping index currentID isFile (x : xs)
-        | isFile = go (mapping `M.union` (M.fromList newIndices)) (index + num) (succ currentID) False xs
+        | isFile = go (mapping `M.union` M.fromList newIndices) (index + num) (succ currentID) False xs
         | otherwise = go mapping (index + num) currentID True xs
       where
         num = digitToInt x
@@ -46,42 +46,14 @@ moveAll mapping maxIndex = case tryMoveOne mapping maxIndex of
 calculateCheckSum :: Map Int Int -> Int
 calculateCheckSum = sum . map (uncurry (*)) . M.assocs
 
-showNew :: Map Int Int -> String
-showNew = concatMap show . map snd . sort . M.toList
+showIds :: Map Int Int -> String
+showIds = concatMap (show . snd) . sort . M.toList
 
 part1 :: String -> Int
 part1 s = calculateCheckSum $ moveAll b maxIndex
   where
     b = pInput s
     maxIndex = maximum (M.keys b)
-pPairs :: String -> [(Int, Int)]
-pPairs = map ((f *** f) . T.splitAt 1) . T.chunksOf 2 . T.pack
-  where
-    f = read . T.unpack
-
-findFittingFileStartIndex :: Map Int Int -> Int -> Int -> Int -> Maybe (Int, Int)
-findFittingFileStartIndex mapping startIndex endIndex freeSpace = fmap (f . snd) . unsnoc . filter ((<= freeSpace) . length) $ fileGroups
-  where
-    fileGroups = groupBy (\a b -> snd a == snd b) $ sortBy (compare `on` snd) $ filter (inRange (startIndex, endIndex) . fst) $ M.toList mapping
-    f lst = (fst $ head lst, length lst)
-
-tryMoveFile :: Map Int Int -> Int -> Maybe (Map Int Int, Int)
-tryMoveFile mapping currentMaxIndex = do
-    let indices = [0 .. currentMaxIndex]
-    freeSpaceStart <- find (`M.notMember` mapping) indices
-    freeSpaceEnd <- find (`M.member` mapping) (drop (succ freeSpaceStart) indices)
-    let freeSize = freeSpaceEnd - freeSpaceStart
-    (fileToMoveIndex, len) <- findFittingFileStartIndex mapping freeSpaceEnd currentMaxIndex freeSize
-    idToMove <- M.lookup fileToMoveIndex mapping
-    let removedOld = foldr (M.delete) mapping [fileToMoveIndex .. fileToMoveIndex + len - 1]
-        newMapping = foldr (flip M.insert idToMove) removedOld [freeSpaceStart .. freeSpaceStart + len - 1]
-        newMaxIndex = until (`M.member` newMapping) pred (currentMaxIndex)
-    pure (newMapping, newMaxIndex)
-
--- moveAllV2 :: Map Int Int -> Int -> Map Int Int
--- moveAllV2 mapping maxIndex = case tryMoveFile mapping maxIndex of
---     Nothing -> mapping
---     Just (newMapping, newMaxIndex) -> moveAllV2 newMapping newMaxIndex
 
 findFittingFreeSpace :: Map Int Int -> Int -> Int -> Maybe [Int]
 findFittingFreeSpace = go 0
@@ -97,14 +69,14 @@ findFittingFreeSpace = go 0
                 then Just [freeSpaceStart .. freeSpaceEnd - 1]
                 else go freeSpaceEnd mapping len maxIndex
 
--- tryMoveId :: Map Int Int -> Int -> Int -> Maybe (Map Int Int)
+tryMoveId :: Map Int Int -> Int -> Int -> Maybe (Map Int Int)
 tryMoveId mapping currentId maxIndex = do
     let indices = M.keys $ M.filter (== currentId) mapping
         len = length indices
     freeSpaceWorks <- findFittingFreeSpace mapping len maxIndex
-    let removedOld = foldr (M.delete) mapping indices
+    let removedOld = foldr M.delete mapping indices
         freeSpaceStart = minimum freeSpaceWorks
-        newMapping = foldr (flip M.insert currentId) removedOld [freeSpaceStart .. freeSpaceStart + len - 1]
+        newMapping = foldr (`M.insert` currentId) removedOld [freeSpaceStart .. freeSpaceStart + len - 1]
 
     pure newMapping
 
@@ -120,3 +92,8 @@ moveAllV2 originalMapping = go (reverse [0 .. maxId]) originalMapping
 
 part2 :: String -> Int
 part2 = calculateCheckSum . moveAllV2 . pInput
+
+pPairs :: String -> [(Int, Int)]
+pPairs = map ((f *** f) . T.splitAt 1) . T.chunksOf 2 . T.pack
+  where
+    f = read . T.unpack
