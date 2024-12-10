@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-x-partial #-}
+
 module Days.D10 (run, part1, part2) where
 
 import Data.Ix (Ix (inRange))
@@ -49,8 +51,8 @@ validAdjacentPoints b visited p = filter f $ adjacentPoints p
     originalValue = mapping M.! p
     f other = other `S.notMember` visited && inBounds other && mapping M.! other == succ originalValue
 
-numTrails :: Board -> Point -> Int
-numTrails b start = go [start] S.empty
+getScore :: Board -> Point -> Int
+getScore b start = go [start] S.empty
   where
     mapping = bMap b
     go [] _ = 0
@@ -61,14 +63,15 @@ numTrails b start = go [start] S.empty
       where
         newVisited = S.insert x visited
 
--- part1 :: String -> Int
-part1 s = sum $ map (numTrails b) possibleStarts
+getZeroPoints :: Board -> [Point]
+getZeroPoints b = map fst $ filter ((== '0') . snd) (M.toList $ bMap b)
+
+part1 :: String -> Int
+part1 s = sum $ map (getScore b) (getZeroPoints b)
   where
     b = pBoard s
-    possibleStarts = map fst $ filter ((== '0') . snd) (M.toList $ bMap b)
-
-numTrails' :: Board -> Point -> Int
-numTrails' b start = go [start] S.empty
+getRating :: Board -> Point -> Int
+getRating b start = go [start] S.empty
   where
     mapping = bMap b
     go [] _ = 0
@@ -79,7 +82,6 @@ numTrails' b start = go [start] S.empty
         newVisited = S.insert x visited
 
 part2 :: String -> Int
-part2 s = sum $ map (numTrails' b) possibleStarts
+part2 s = sum $ map (getRating b) (getZeroPoints b)
   where
     b = pBoard s
-    possibleStarts = map fst $ filter ((== '0') . snd) (M.toList $ bMap b)
