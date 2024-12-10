@@ -70,6 +70,7 @@ part1 :: String -> Int
 part1 s = sum $ map (getScore b) (getZeroPoints b)
   where
     b = pBoard s
+
 getRating :: Board -> Point -> Int
 getRating b start = go [start] S.empty
   where
