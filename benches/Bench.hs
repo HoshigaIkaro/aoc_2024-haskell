@@ -9,7 +9,7 @@ import Days.D4 qualified as D4
 import Days.D5 qualified as D5
 import Days.D7 qualified as D7
 import Days.D8 qualified as D8
-
+import Days.D10 qualified as D10
 
 main :: IO ()
 main = do
@@ -28,9 +28,14 @@ main = do
         --     , bench "part 2" $ whnf D5.part2 inputD5
         --     ]
         -- , 
+        -- bgroup
+        --     "day 8"
+        --     [ bench "part 1" $ whnf D8.part1 inputD5
+        --     , bench "part 2" $ whnf D8.part2 inputD5
+        --     ]
         bgroup
-            "day 8"
-            [ bench "part 1" $ whnf D8.part1 inputD5
-            , bench "part 2" $ whnf D8.part2 inputD5
+            "day 10"
+            [ bench "part 1" $ whnf D10.part1 inputD5
+            , bench "part 2" $ whnf D10.part2 inputD5
             ]
         ]
