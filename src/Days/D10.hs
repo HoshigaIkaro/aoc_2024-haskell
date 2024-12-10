@@ -58,10 +58,11 @@ getScore b start = go [start] S.empty
     go [] _ = 0
     go (x : xs) visited
         | x `elem` visited = go xs visited
-        | mapping M.! x == '9' = 1 + go (xs ++ validAdjacentPoints b newVisited x) newVisited
-        | otherwise = go (xs ++ validAdjacentPoints b newVisited x) newVisited
+        | mapping M.! x == '9' = 1 + rest
+        | otherwise = rest
       where
         newVisited = S.insert x visited
+        rest = go (xs ++ validAdjacentPoints b newVisited x) newVisited
 
 getZeroPoints :: Board -> [Point]
 getZeroPoints b = map fst $ filter ((== '0') . snd) (M.toList $ bMap b)
@@ -77,10 +78,11 @@ getRating b start = go [start] S.empty
     mapping = bMap b
     go [] _ = 0
     go (x : xs) visited
-        | mapping M.! x == '9' = 1 + go (xs ++ validAdjacentPoints b newVisited x) newVisited
-        | otherwise = go (xs ++ validAdjacentPoints b newVisited x) newVisited
+        | mapping M.! x == '9' = 1 + rest
+        | otherwise = rest
       where
         newVisited = S.insert x visited
+        rest = go (xs ++ validAdjacentPoints b newVisited x) newVisited
 
 part2 :: String -> Int
 part2 s = sum $ map (getRating b) (getZeroPoints b)
