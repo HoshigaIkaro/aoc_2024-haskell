@@ -13,7 +13,7 @@ import Data.Text qualified as T
 run :: IO ()
 run = do
     input <- readFile "input/d9.txt"
-    -- print $ part1 input
+    print $ part1 input
     print $ part2 input
 
 pInput :: String -> Map Int Int
