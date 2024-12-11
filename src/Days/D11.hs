@@ -1,8 +1,9 @@
 module Days.D11 (run, part1, part2) where
 
-import Data.Map (Map)
-import Data.Map qualified as M
+import Data.IntMap.Strict (IntMap)
+import Data.IntMap.Strict qualified as M
 import GHC.Float (double2Int, int2Double)
+
 
 run :: IO ()
 run = do
@@ -12,7 +13,7 @@ run = do
 
 type Count = Int
 
-type Frequencies = Map Int Count
+type Frequencies = IntMap Count
 
 evolve :: Frequencies -> Frequencies
 evolve = foldr f M.empty . M.toList
