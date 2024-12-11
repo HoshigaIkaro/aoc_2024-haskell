@@ -4,7 +4,6 @@ import Data.IntMap.Strict (IntMap)
 import Data.IntMap.Strict qualified as M
 import GHC.Float (double2Int, int2Double)
 
-
 run :: IO ()
 run = do
     input <- readFile "input/d11.txt"

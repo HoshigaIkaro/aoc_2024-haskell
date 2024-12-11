@@ -2,12 +2,9 @@ module Days.D9 (run, part1, part2) where
 
 import Control.Arrow
 import Data.Char (digitToInt)
-import Data.Function
-import Data.Ix (Ix (inRange))
+import Data.IntMap.Strict (IntMap)
+import Data.IntMap.Strict qualified as M
 import Data.List
-import Data.Map (Map)
-import Data.Map qualified as M
-import Data.Text (Text)
 import Data.Text qualified as T
 
 run :: IO ()
@@ -16,10 +13,10 @@ run = do
     print $ part1 input
     print $ part2 input
 
-pInput :: String -> Map Int Int
+pInput :: String -> IntMap Int
 pInput = go M.empty 0 0 True
   where
-    go :: Map Int Int -> Int -> Int -> Bool -> String -> Map Int Int
+    go :: IntMap Int -> Int -> Int -> Bool -> String -> IntMap Int
     go mapping _ _ _ [] = mapping
     go mapping index currentID isFile (x : xs)
         | isFile = go (mapping `M.union` M.fromList newIndices) (index + num) (succ currentID) False xs
@@ -28,7 +25,7 @@ pInput = go M.empty 0 0 True
         num = digitToInt x
         newIndices = map (,currentID) $ take num [index ..]
 
-tryMoveOne :: Map Int Int -> Int -> Maybe (Map Int Int, Int)
+tryMoveOne :: IntMap Int -> Int -> Maybe (IntMap Int, Int)
 tryMoveOne mapping currentMaxIndex = do
     let indices = [0 .. currentMaxIndex]
     freeSpaceIndex <- find (`M.notMember` mapping) indices
@@ -38,15 +35,15 @@ tryMoveOne mapping currentMaxIndex = do
         newMaxIndex = until (`M.member` newMapping) pred currentMaxIndex
     pure (newMapping, newMaxIndex)
 
-moveAll :: Map Int Int -> Int -> Map Int Int
+moveAll :: IntMap Int -> Int -> IntMap Int
 moveAll mapping maxIndex = case tryMoveOne mapping maxIndex of
     Nothing -> mapping
     Just (newMapping, newMaxIndex) -> moveAll newMapping newMaxIndex
 
-calculateCheckSum :: Map Int Int -> Int
+calculateCheckSum :: IntMap Int -> Int
 calculateCheckSum = sum . map (uncurry (*)) . M.assocs
 
-showIds :: Map Int Int -> String
+showIds :: IntMap Int -> String
 showIds = concatMap (show . snd) . sort . M.toList
 
 part1 :: String -> Int
@@ -55,7 +52,7 @@ part1 s = calculateCheckSum $ moveAll b maxIndex
     b = pInput s
     maxIndex = maximum (M.keys b)
 
-findFittingFreeSpace :: Map Int Int -> Int -> Int -> Maybe [Int]
+findFittingFreeSpace :: IntMap Int -> Int -> Int -> Maybe [Int]
 findFittingFreeSpace = go 0
   where
     go start mapping len maxIndex
@@ -69,7 +66,7 @@ findFittingFreeSpace = go 0
                 then Just [freeSpaceStart .. freeSpaceEnd - 1]
                 else go freeSpaceEnd mapping len maxIndex
 
-tryMoveId :: Map Int Int -> Int -> Int -> Maybe (Map Int Int)
+tryMoveId :: IntMap Int -> Int -> Int -> Maybe (IntMap Int)
 tryMoveId mapping currentId maxIndex = do
     let indices = M.keys $ M.filter (== currentId) mapping
         len = length indices
@@ -80,7 +77,7 @@ tryMoveId mapping currentId maxIndex = do
 
     pure newMapping
 
-moveAllV2 :: Map Int Int -> Map Int Int
+moveAllV2 :: IntMap Int -> IntMap Int
 moveAllV2 originalMapping = go (reverse [0 .. maxId]) originalMapping
   where
     maxId = maximum $ M.elems originalMapping
