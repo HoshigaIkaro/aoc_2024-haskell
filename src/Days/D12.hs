@@ -1,7 +1,8 @@
+{-# OPTIONS_GHC -Wno-x-partial #-}
+
 module Days.D12 (run, part1, part2) where
 
 import Control.Arrow
-import Data.Ix
 import Data.List (nub, sort)
 import Data.Map (Map)
 import Data.Map qualified as M
@@ -16,22 +17,13 @@ run = do
 
 type Point = (Int, Int)
 
-data Board = Board
-    { bMap :: Map Point Char
-    , bWidth :: Int
-    , bHeight :: Int
-    }
-    deriving (Show)
-
-pBoard :: String -> Board
-pBoard s = Board{bMap = mapping, bWidth = width, bHeight = height}
+pInput :: String -> Map Point Char
+pInput s = mapping
   where
     ls = lines s
-    height = length ls
-    width = length (head ls)
-    allPointsInRow row = [(row, col) | col <- [0 .. width - 1]]
+    allPointsInRow row = [(row, col) | col <- [0 ..]]
     f row = zip (allPointsInRow row)
-    mapping = M.fromList . concat $ zipWith f [0 .. height - 1] ls
+    mapping = M.fromList . concat $ zipWith f [0 ..] ls
 
 adjacentPoints :: Point -> [Point]
 adjacentPoints (r, c) = [(r - 1, c), (r, c - 1), (r, c + 1), (r + 1, c)]
@@ -76,41 +68,31 @@ farmPerimeter points = go points
         adjacent = filter (`S.member` pointSet) $ adjacentPoints x
 
 part1 :: String -> Int
-part1 s = sum . map ((*) <$> farmArea <*> farmPerimeter) $ groupFarms mapping
-  where
-    b = pBoard s
-    mapping = bMap b
+part1 = sum . map ((*) <$> farmArea <*> farmPerimeter) . groupFarms . pInput
 
 horizontalSides :: [Point] -> [Point] -> Int
 horizontalSides farmPoints points =
-    sum
-        . map ((+) <$> goUp <*> goDown)
-        $ map (flip getRow points) rows
+    sum (map (((+) <$> goUp <*> goDown) . (`getRow` points)) rows)
   where
     rows = nub $ map fst points
     getRow r = sort . filter ((== r) . fst)
     go [] = []
     go (x : xs) = (x : tailSide) : go (drop (length tailSide) xs)
       where
-        tailSide = takeWhile (\p -> p `elem` xs) $ drop 1 $ iterate (second succ) x
+        tailSide = takeWhile (`elem` xs) $ drop 1 $ iterate (second succ) x
     goUp = length . go . filter (\p -> first pred p `elem` farmPoints)
     goDown = length . go . filter (\p -> first succ p `elem` farmPoints)
 
 verticalSides :: [Point] -> [Point] -> Int
 verticalSides farmPoints encasementPoints =
-    sum
-        . map ((+) <$> goLeft <*> goRight)
-        $ map (flip getColumn encasementPoints) columns
+    sum (map (((+) <$> goLeft <*> goRight) . (`getColumn` encasementPoints)) columns)
   where
-    -- top = first pred
-    -- bottom = first succ
-    f p = (second pred p `elem` farmPoints || second succ p `elem` farmPoints)
     columns = nub $ map snd encasementPoints
     getColumn c = sort . filter ((== c) . snd)
     go [] = []
     go (x : xs) = (x : tailSide) : go (drop (length tailSide) xs)
       where
-        tailSide = takeWhile (\p -> p `elem` xs) $ drop 1 $ iterate (first succ) x
+        tailSide = takeWhile (`elem` xs) $ drop 1 $ iterate (first succ) x
     goLeft = length . go . filter (\p -> second pred p `elem` farmPoints)
     goRight = length . go . filter (\p -> second succ p `elem` farmPoints)
 
@@ -128,11 +110,9 @@ encase points = S.toList $ go points S.empty
         adjacentNotInFarm = filter (`notElem` points) adjacent
         newVisited = S.insert x visited
 
--- part2 :: String -> Int
-part2 s = sum . map ((*) <$> farmArea <*> getSides) $ groupFarms mapping
+part2 :: String -> Int
+part2 = sum . map ((*) <$> farmArea <*> getSides) . groupFarms . pInput
   where
-    b = pBoard s
-    mapping = bMap b
     getSides farm =
         let encased = encase farm
          in verticalSides farm encased + horizontalSides farm encased
