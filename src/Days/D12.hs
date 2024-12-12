@@ -72,7 +72,7 @@ part1 = sum . map ((*) <$> farmArea <*> farmPerimeter) . groupFarms . pInput
 
 horizontalSides :: [Point] -> [Point] -> Int
 horizontalSides farmPoints points =
-    sum (map (((+) <$> goUp <*> goDown) . (`getRow` points)) rows)
+    sum (map (((+) <$> topSides <*> bottomSides) . (`getRow` points)) rows)
   where
     rows = nub $ map fst points
     getRow r = sort . filter ((== r) . fst)
@@ -80,12 +80,12 @@ horizontalSides farmPoints points =
     go (x : xs) = (x : tailSide) : go (drop (length tailSide) xs)
       where
         tailSide = takeWhile (`elem` xs) $ drop 1 $ iterate (second succ) x
-    goUp = length . go . filter (\p -> first pred p `elem` farmPoints)
-    goDown = length . go . filter (\p -> first succ p `elem` farmPoints)
+    topSides = length . go . filter (\p -> first pred p `elem` farmPoints)
+    bottomSides = length . go . filter (\p -> first succ p `elem` farmPoints)
 
 verticalSides :: [Point] -> [Point] -> Int
 verticalSides farmPoints encasementPoints =
-    sum (map (((+) <$> goLeft <*> goRight) . (`getColumn` encasementPoints)) columns)
+    sum (map (((+) <$> leftSides <*> rightSides) . (`getColumn` encasementPoints)) columns)
   where
     columns = nub $ map snd encasementPoints
     getColumn c = sort . filter ((== c) . snd)
@@ -93,8 +93,8 @@ verticalSides farmPoints encasementPoints =
     go (x : xs) = (x : tailSide) : go (drop (length tailSide) xs)
       where
         tailSide = takeWhile (`elem` xs) $ drop 1 $ iterate (first succ) x
-    goLeft = length . go . filter (\p -> second pred p `elem` farmPoints)
-    goRight = length . go . filter (\p -> second succ p `elem` farmPoints)
+    leftSides = length . go . filter (\p -> second pred p `elem` farmPoints)
+    rightSides = length . go . filter (\p -> second succ p `elem` farmPoints)
 
 encase :: [Point] -> [Point]
 encase points = S.toList $ go points S.empty
