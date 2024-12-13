@@ -15,25 +15,24 @@ type Parser = Parsec Void Text
 
 type Point = (Int, Int)
 
+pButton :: Text -> Parser Point
+pButton button = do
+    void $ string ("Button " <> button <> ": X+")
+    x <- L.decimal
+    void $ string ", Y+"
+    y <- L.decimal
+    void eol
+    pure (x, y)
+
 pGroup :: Parser (Point, Point, Point)
 pGroup = do
-    void $ string "Button A: X+"
-    xA <- L.decimal
-    void $ string ", Y+"
-    yA <- L.decimal
-    void eol
-    void $ string "Button B: X+"
-    xB <- L.decimal
-    void $ string ", Y+"
-    yB <- L.decimal
-    void eol
+    a <- pButton "A"
+    b <- pButton "B"
     void $ string "Prize: X="
     xP <- L.decimal
     void $ string ", Y="
     yP <- L.decimal
-    let a = (xA, yA)
-        b = (xB, yB)
-        p = (xP, yP)
+    let p = (xP, yP)
     void eol -- Expect every group to end in an end of line sequence
     pure (a, b, p)
 
