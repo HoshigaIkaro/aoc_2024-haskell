@@ -3,8 +3,6 @@
 module Days.D13 (run, part1, part2) where
 
 import Control.Monad
-import Data.Function
-import Data.List
 import Data.Maybe (fromJust, mapMaybe)
 import Data.Text (Text)
 import Data.Text qualified as T
@@ -48,40 +46,14 @@ run = do
     print $ part1 input
     print $ part2 input
 
+-- | linear combination of integers possible
 possible :: Int -> Int -> Int -> Bool
 possible a b c = c `mod` d == 0
   where
     d = gcd a b
 
-findPairings :: Point -> Point -> Point -> Maybe [Point]
-findPairings (xA, yA) (xB, yB) (xP, yP) = case go 0 of
-    [] -> Nothing
-    lst -> Just lst
-  where
-    go numB
-        | current > xP || numB > 100 = []
-        | diff `mod` xA == 0 && numA <= 100 && worksForY = (numA, numB) : rest
-        | otherwise = rest
-      where
-        current = numB * xB
-        diff = xP - current
-        numA = diff `div` xA
-        rest = go (numB + 1)
-        worksForY = numA * yA + numB * yB == yP
-
 cost :: Point -> Int
 cost = (+) <$> ((* 3) . fst) <*> snd
-
-processGroup :: (Point, Point, Point) -> Maybe Int
-processGroup (a@(xA, yA), b@(xB, yB), p@(xP, yP))
-    | possible xA xB xP && possible yA yB yP = one
-    | otherwise = Nothing
-  where
-    f = minimum . map cost
-    one = f <$> findPairings a b p
-
-part1 :: String -> Int
-part1 = sum . mapMaybe processGroup . pInput
 
 findPair :: Point -> Point -> Point -> Maybe Point
 findPair (x1, y1) (x2, y2) (x3, y3)
@@ -96,8 +68,11 @@ processGroupV2 (a@(xA, yA), b@(xB, yB), p@(xP, yP))
     | possible xA xB xP && possible yA yB yP = cost <$> findPair a b p
     | otherwise = Nothing
 
+part1 :: String -> Int
+part1 = sum . mapMaybe processGroupV2 . pInput
+
 part2 :: String -> Int
-part2 = sum . mapMaybe processGroupV2 . map f . pInput
+part2 = sum . mapMaybe (processGroupV2 . f) . pInput
   where
     n = 10000000000000
     f (a, b, (x, y)) = (a, b, (x + n, y + n))
