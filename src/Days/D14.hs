@@ -20,8 +20,6 @@ run = do
     print $ part1 input
     print $ part2 input
 
--- simulate input (101, 103)
-
 type Parser = Parsec Void Text
 
 type Point = (Int, Int)
@@ -113,7 +111,7 @@ simulate s size = go 0 $ pInput s
         appendFile "./output/d14.txt" (displayPoints size (map fst lst))
         appendFile "./output/d14.txt" "\n"
         let new = map ((,) <$> (wrap size . positionAfter 1) <*> snd) lst
-        if time < 12000 then go (time + 1) new else pure ()
+        when (time < 12000) $ go (time + 1) new
 
 rowInPoints :: Int -> Point -> [Point] -> Bool
 rowInPoints t (width, height) points = any (`S.isSubsetOf` pointSet) allSubSet
@@ -123,7 +121,6 @@ rowInPoints t (width, height) points = any (`S.isSubsetOf` pointSet) allSubSet
     allSubSet = concatMap f [0 .. height - 1]
 
 part2 :: String -> Int
--- part2 s = displayPoints size $ map (wrap size . positionAfter 6771) $ pInput s
 part2 s = go 0 $ pInput s
   where
     size = (101, 103)
