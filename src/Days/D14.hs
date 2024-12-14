@@ -1,4 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-unused-local-binds #-}
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
 
 module Days.D14 (run, part1, part2) where
 
@@ -19,6 +21,8 @@ run = do
     input <- readFile "input/d14.txt"
     print $ part1 input
     print $ part2 input
+
+-- simulate input (101, 103)
 
 type Parser = Parsec Void Text
 
@@ -107,7 +111,7 @@ simulate :: String -> Point -> IO ()
 simulate s size = go 0 $ pInput s
   where
     go time lst = do
-        appendFile "./output/d14.txt" (show time <> "\n")
+        appendFile "./output/d14.txt" (show (time :: Int) <> "\n")
         appendFile "./output/d14.txt" (displayPoints size (map fst lst))
         appendFile "./output/d14.txt" "\n"
         let new = map ((,) <$> (wrap size . positionAfter 1) <*> snd) lst
@@ -120,13 +124,19 @@ rowInPoints t (width, height) points = any (`S.isSubsetOf` pointSet) allSubSet
     f y = [S.fromList [(x, y) | x <- [s .. s + t]] | s <- [0 .. width - 1 - t]]
     allSubSet = concatMap f [0 .. height - 1]
 
+-- | All robots with unique points seem to mean a Christmas tree appears
+allUnique :: [Point] -> Bool
+allUnique = (==) <$> length <*> (S.size . S.fromList)
+
 part2 :: String -> Int
-part2 s = go 0 $ pInput s
+part2 s = go 0 allUnique $ pInput s
   where
     size = (101, 103)
-    go time lst
-        | rowInPoints 7 size points = time
-        | otherwise = go (time + 1) new
+    -- | original check for tree
+    rowExists = rowInPoints 7 size
+    go time f lst
+        | f points && time /= 0 = time
+        | otherwise = go (time + 1) f new
       where
         points = map fst lst
         new = map ((,) <$> (wrap size . positionAfter 1) <*> snd) lst
