@@ -8,8 +8,6 @@ import Data.Map.Strict qualified as M
 import Data.Set (Set)
 import Data.Set qualified as S
 
--- import Text.Megaparsec.Char
-
 import Control.Arrow
 import Data.Containers.ListUtils (nubOrd)
 
@@ -18,8 +16,6 @@ run = do
     input <- readFile "input/d15.txt"
     print $ part1 input
     print $ part2 input
-
--- putStrLn $ part2 input
 
 type Point = (Int, Int)
 
@@ -137,10 +133,6 @@ tryMoveV2 dir b
     newRobot = moveFunc robot
     lineUntilFree = case getConnected [newRobot] S.empty of
         Nothing -> Nothing
-        Just [] ->
-            if newRobot `S.member` walls
-                then Nothing
-                else Just []
         Just lst ->
             if any (\p -> moveFunc p `S.member` walls) (nubOrd lst)
                 then Nothing
