@@ -79,7 +79,7 @@ tryMove dir b = case lineUntilFree of
     moveFunc = moveDir dir
     newRobot = moveFunc robot
     lineUntilFree =
-        case takeWhile ((&&) <$> (`S.notMember` walls) <*> (`M.member` mapping)) $ iterate moveFunc newRobot of
+        case takeWhile (`M.member` mapping) $ iterate moveFunc newRobot of
             [] -> if newRobot `S.member` walls then Nothing else Just []
             lst -> if moveFunc (last lst) `S.member` walls then Nothing else Just lst
     newMap = updateMap moveFunc mapping
