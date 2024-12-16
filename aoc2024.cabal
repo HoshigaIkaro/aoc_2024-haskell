@@ -80,6 +80,7 @@ library
         Days.D13
         Days.D14
         Days.D15
+        Days.D16
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -93,6 +94,7 @@ library
                     , parallel
                     , deepseq
                     , mtl
+                    , heaps
 
     -- Directories containing source files.
     hs-source-dirs:   src
