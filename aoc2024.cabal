@@ -81,6 +81,7 @@ library
         Days.D14
         Days.D15
         Days.D16
+        Days.D17
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
