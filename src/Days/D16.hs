@@ -2,13 +2,13 @@
 
 module Days.D16 (run, part1, part2) where
 
+import Control.Arrow
+import Data.Heap (Heap)
+import Data.Heap qualified as H
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as M
 import Data.Set (Set)
 import Data.Set qualified as S
-import Control.Arrow
-import Data.Heap (Heap)
-import Data.Heap qualified as H
 
 run :: IO ()
 run = do
@@ -95,10 +95,10 @@ findBestPathPoints b target = S.fromList $ map fst $ go initialHeap M.empty
     allTarget = map (target,) [UP, DOWN, LEFT, RIGHT]
     start = bStart b
     mapping = bMap b
-    initialHeap :: Heap (H.Entry Int [((Point, Direction), (Point, Direction))])
-    initialHeap = H.singleton (H.Entry 0 [((start, RIGHT), (start, RIGHT))])
+    initialHeap :: Heap (H.Entry Int ((Point, Direction), (Point, Direction)))
+    initialHeap = H.singleton (H.Entry 0 ((start, RIGHT), (start, RIGHT)))
     go ::
-        Heap (H.Entry Int [((Point, Direction), (Point, Direction))]) ->
+        Heap (H.Entry Int ((Point, Direction), (Point, Direction))) ->
         Map (Point, Direction) (Int, [(Point, Direction)]) ->
         [(Point, Direction)]
     go heap visited
@@ -107,11 +107,10 @@ findBestPathPoints b target = S.fromList $ map fst $ go initialHeap M.empty
         | point == target = final allTarget $ M.map snd newVisited
         | otherwise = go (newHeap <> newStates) newVisited
       where
-        (H.Entry{priority = score, payload = stateL}) = H.minimum heap
-        (state@(point, dir), old) = head stateL
+        (H.Entry{priority = score, payload = (state@(point, dir), old)}) = H.minimum heap
         newHeap = H.deleteMin heap
         f s = incScorFunc dir s score
-        newStates = H.fromList $ map (H.Entry <$> f <*> ((: stateL) . (,state))) $ validAdjacentStates mapping S.empty state
+        newStates = H.fromList $ map (H.Entry <$> f <*> ((,state))) $ validAdjacentStates mapping S.empty state
         incScorFunc originalDir (_, newDir)
             | originalDir == newDir = succ
             | otherwise = (+ 1001)
