@@ -56,41 +56,42 @@ data Computer = Computer
     deriving (Show)
 
 runProgram :: Maybe Int -> Computer -> Computer
-runProgram earlyTermination comp =
-    let program = cProgram comp
-        pointer = cPointer comp
-        op = program !! pointer
-        operand = program !! (pointer + 1)
-        newPointer = pointer + 2
-        divResult =
-            let numerator = regA comp
-                denominator = 2 ^ compoundOp operand comp
-             in numerator `div` denominator
-        newComp = case op of
-            ADV -> comp{regA = divResult, cPointer = newPointer}
-            BXL ->
-                let result = regB comp `xor` fromEnum operand
-                 in comp{regB = result, cPointer = newPointer}
-            BST ->
-                let result = compoundOp operand comp `mod` 8
-                 in comp{regB = result, cPointer = newPointer}
-            JNZ ->
-                let value = regA comp
-                    target = fromEnum operand
-                 in if value == 0
-                        then comp{cPointer = newPointer}
-                        else comp{cPointer = target}
-            BXC ->
-                let result = regB comp `xor` regC comp
-                 in comp{regB = result, cPointer = newPointer}
-            OUT ->
-                let result = compoundOp operand comp `mod` 8
-                 in comp{output = result : output comp, cPointer = newPointer}
-            BDV -> comp{regB = divResult, cPointer = newPointer}
-            CDV -> comp{regC = divResult, cPointer = newPointer}
-     in if pointer >= length program - 1 || (isJust earlyTermination && fromJust earlyTermination <= length (output comp))
-            then comp
-            else runProgram earlyTermination newComp
+runProgram earlyTermination comp
+    | pointer >= length program - 1 || outputLengthReached = comp
+    | otherwise = runProgram earlyTermination newComp
+  where
+    outputLengthReached = maybe False (<= length (output comp)) earlyTermination
+    program = cProgram comp
+    pointer = cPointer comp
+    op = program !! pointer
+    operand = program !! (pointer + 1)
+    newPointer = pointer + 2
+    divResult =
+        let numerator = regA comp
+            denominator = 2 ^ compoundOp operand comp
+         in numerator `div` denominator
+    newComp = case op of
+        ADV -> comp{regA = divResult, cPointer = newPointer}
+        BXL ->
+            let result = regB comp `xor` fromEnum operand
+             in comp{regB = result, cPointer = newPointer}
+        BST ->
+            let result = compoundOp operand comp `mod` 8
+             in comp{regB = result, cPointer = newPointer}
+        JNZ ->
+            let value = regA comp
+                target = fromEnum operand
+             in if value == 0
+                    then comp{cPointer = newPointer}
+                    else comp{cPointer = target}
+        BXC ->
+            let result = regB comp `xor` regC comp
+             in comp{regB = result, cPointer = newPointer}
+        OUT ->
+            let result = compoundOp operand comp `mod` 8
+             in comp{output = result : output comp, cPointer = newPointer}
+        BDV -> comp{regB = divResult, cPointer = newPointer}
+        CDV -> comp{regC = divResult, cPointer = newPointer}
 
 type Parser = Parsec Void Text
 
