@@ -62,12 +62,12 @@ runProgram earlyTermination comp =
         op = program !! pointer
         operand = program !! (pointer + 1)
         newPointer = pointer + 2
+        divResult =
+            let numerator = regA comp
+                denominator = 2 ^ compoundOp operand comp
+             in numerator `div` denominator
         newComp = case op of
-            ADV ->
-                let numerator = regA comp
-                    denominator = 2 ^ compoundOp operand comp
-                    result = numerator `div` denominator
-                 in comp{regA = result, cPointer = newPointer}
+            ADV -> comp{regA = divResult, cPointer = newPointer}
             BXL ->
                 let result = regB comp `xor` fromEnum operand
                  in comp{regB = result, cPointer = newPointer}
@@ -86,16 +86,8 @@ runProgram earlyTermination comp =
             OUT ->
                 let result = compoundOp operand comp `mod` 8
                  in comp{output = result : output comp, cPointer = newPointer}
-            BDV ->
-                let numerator = regA comp
-                    denominator = 2 ^ compoundOp operand comp
-                    result = numerator `div` denominator
-                 in comp{regB = result, cPointer = newPointer}
-            CDV ->
-                let numerator = regA comp
-                    denominator = 2 ^ compoundOp operand comp
-                    result = numerator `div` denominator
-                 in comp{regC = result, cPointer = newPointer}
+            BDV -> comp{regB = divResult, cPointer = newPointer}
+            CDV -> comp{regC = divResult, cPointer = newPointer}
      in if pointer >= length program - 1 || (isJust earlyTermination && fromJust earlyTermination <= length (output comp))
             then comp
             else runProgram earlyTermination newComp
