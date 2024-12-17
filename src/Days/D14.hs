@@ -11,7 +11,6 @@ import Data.IntMap (IntMap)
 import Data.IntMap qualified as IM
 import Data.Ix (Ix (inRange))
 import Data.List (minimumBy)
-import Data.Map (Map)
 import Data.Maybe (fromJust)
 import Data.Set qualified as S
 import Data.Text (Text)
