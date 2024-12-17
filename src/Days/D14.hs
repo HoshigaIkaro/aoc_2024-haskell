@@ -6,7 +6,12 @@ module Days.D14 (run, part1, part2) where
 
 import Control.Arrow
 import Control.Monad
+import Data.Function
+import Data.IntMap (IntMap)
+import Data.IntMap qualified as IM
 import Data.Ix (Ix (inRange))
+import Data.List (minimumBy)
+import Data.Map (Map)
 import Data.Maybe (fromJust)
 import Data.Set qualified as S
 import Data.Text (Text)
@@ -63,6 +68,9 @@ positionAfter time ((x, y), velocity) = (x + deltaX, y + deltaY)
 
 wrap :: Point -> Point -> Point
 wrap (width, height) (x, y) = (x `mod` width, y `mod` height)
+
+positionAfterWrapped :: Point -> Int -> (Point, Point) -> Point
+positionAfterWrapped size = (wrap size .) . positionAfter
 
 downLeftQuadrant :: Point -> [Point] -> [Point]
 downLeftQuadrant (width, height) = filter f
@@ -128,11 +136,62 @@ rowInPoints t (width, height) points = any (`S.isSubsetOf` pointSet) allSubSet
 allUnique :: [Point] -> Bool
 allUnique = (==) <$> length <*> (S.size . S.fromList)
 
-part2 :: String -> Int
-part2 s = go 0 allUnique $ pInput s
+type Mean = Double
+type Variance = Double
+
+frequencies :: [Int] -> IntMap Int
+frequencies = foldr f mempty
   where
+    f = IM.alter (Just . maybe 1 succ)
+
+empiricalDist :: [Int] -> IntMap Double
+empiricalDist values = IM.map ((/ len) . fromIntegral) freq
+  where
+    freq = frequencies values
+    len = fromIntegral $ length values
+
+meanAndVariances :: [Point] -> ((Mean, Variance), (Mean, Variance))
+meanAndVariances = (calculate *** calculate) . unzip
+  where
+    calculate :: [Int] -> (Mean, Variance)
+    calculate ps =
+        let empDist = empiricalDist ps
+            mean = sum $ map (uncurry (*) . first fromIntegral) $ IM.toList empDist
+            f (val, prob) = prob * ((fromIntegral val - mean) ** 2)
+         in (mean, sum . map f $ IM.toList empDist)
+
+variances :: [Point] -> (Variance, Variance)
+variances = (snd *** snd) . meanAndVariances
+
+findOutlierTimesInCycle :: Point -> [(Point, Point)] -> Point
+findOutlierTimesInCycle size@(height, width) start =
+    (go *** go)
+        . unzip
+        . map variances
+        $ map (flip map start . positionAfterWrapped size) [1 .. max height width]
+  where
+    go :: [Variance] -> Int
+    go = fst . minimumBy (compare `on` snd) . zip [1 ..]
+
+-- pulverizer :: Int -> Int -> Int
+-- pulverizer a b =
+
+-- findCoeff :: Point -> Point -> Point
+-- findCoeff (width, height) (x, y) = (0, 0)
+
+findIntersection :: Point -> Point -> Int
+findIntersection (width, height) (x, y) = x + a * w
+  where
+    w = mod width height
+    modInverseHeight = until ((== 1) . (`mod` height) . (* w)) succ 1
+    a = ((y - x) * modInverseHeight) `mod` height
+
+part2 :: String -> Int
+part2 s = findIntersection size $ findOutlierTimesInCycle size $ pInput s
+  where
+    -- part2 s = go 0 allUnique $ pInput s
     size = (101, 103)
-    -- | original check for tree
+    -- \| original check for tree
     rowExists = rowInPoints 7 size
     go time f lst
         | f points && time /= 0 = time
