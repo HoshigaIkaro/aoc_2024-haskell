@@ -164,10 +164,11 @@ variances = (snd *** snd) . meanAndVariances
 
 findOutlierTimesInCycle :: Point -> [(Point, Point)] -> Point
 findOutlierTimesInCycle size@(height, width) start =
-    (go *** go)
-        . unzip
-        . map variances
-        $ map (flip map start . positionAfterWrapped size) [1 .. max height width]
+    ((go *** go) . unzip)
+        ( map
+            (variances . flip map start . positionAfterWrapped size)
+            [1 .. max height width]
+        )
   where
     go :: [Variance] -> Int
     go = fst . minimumBy (compare `on` snd) . zip [1 ..]

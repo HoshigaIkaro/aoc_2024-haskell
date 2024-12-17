@@ -110,7 +110,7 @@ findBestPathPoints b target = S.fromList $ map fst $ go initialHeap M.empty
         (H.Entry{priority = score, payload = (state@(point, dir), old)}) = H.minimum heap
         newHeap = H.deleteMin heap
         f s = incScorFunc dir s score
-        newStates = H.fromList $ map (H.Entry <$> f <*> ((,state))) $ validAdjacentStates mapping S.empty state
+        newStates = H.fromList $ map (H.Entry <$> f <*> (,state)) $ validAdjacentStates mapping S.empty state
         incScorFunc originalDir (_, newDir)
             | originalDir == newDir = succ
             | otherwise = (+ 1001)
