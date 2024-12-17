@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# OPTIONS_GHC -Wno-x-partial #-}
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
+{-# OPTIONS_GHC -Wno-x-partial #-}
 
 module Days.D17 (run, part1, part2) where
 
@@ -122,50 +122,38 @@ pComputer = do
 pInput :: String -> Computer
 pInput = fromJust . parseMaybe (pComputer <* optional eol) . T.pack
 
--- part1 :: String -> String
+part1 :: String -> String
 part1 s = intercalate "," . map show . reverse . output $ runProgram Nothing comp
   where
     comp = pInput s
 
-oneLoop :: Int -> (Int, Int)
-oneLoop a = (a', b'''' `mod` 8)
-  where
-    b' = a `mod` 8 -- littlest 3 bits of a
-    b'' = b' `xor` 2 -- flip 2nd bit
-    c' = a `div` (2 ^ b'') -- shift a by b bits right and store in c
-    b''' = b'' `xor` 3 -- flip 3rd bit
-    b'''' = b''' `xor` c' -- xor b with c: outputted
-    a' = a `div` 8 -- discard littlest 3 bits of a
+-- | runs the computer loop once with the provided input and returns the output
+oneLoopWithComp :: Computer -> Int -> Int
+oneLoopWithComp comp n = head . output $ runProgram (Just 1) comp{regA = n}
 
-oneLoopD :: Int -> Int
-oneLoopD = snd . oneLoop
-
-doAll :: Int -> [Int]
-doAll 0 = []
-doAll a = let (a', val) = oneLoop a in val : doAll a'
-
+-- | for working backwards through the program
 adjacentNum :: Int -> [Int]
-adjacentNum larger = [alpha .|. gamma | gamma <- [0 .. (1 .<<. 3) - 1]]
+adjacentNum num = [alpha .|. gamma | gamma <- [0 .. (1 .<<. 3) - 1]]
   where
-    alpha = larger .<<. 3
+    alpha = num .<<. 3
 
-findMatching :: [Int] -> Int
-findMatching program = go start
+findMatchingWithComp :: Computer -> Int
+findMatchingWithComp comp = go start
   where
-    start = map (,drop 1 $ reverse program) $ filter ((== 0) . oneLoopD) [0 .. (1 .<<. 3) - 1]
+    program = map fromEnum $ cProgram comp
+    start = map (,drop 1 $ reverse program) $ filter ((== 0) . oneLoopWithComp comp) [0 .. (1 .<<. 3) - 1]
     go [] = 0
     go ((num, prog) : xs)
         | null prog = num
         | otherwise = go (xs <> newStates)
       where
         p = head prog
-        newStates = map (,drop 1 prog) . filter ((== p) . oneLoopD) $ adjacentNum num
+        newStates = map (,drop 1 prog) . filter ((== p) . oneLoopWithComp comp) $ adjacentNum num
 
 part2 :: String -> Int
-part2 s = findMatching program
-  where
-    comp = pInput s
-    program = map fromEnum $ cProgram comp
+part2 = findMatchingWithComp . pInput
+
+-- unused below
 
 -- findMatching :: [Int] -> IO Int
 -- findMatching program = print start >> go start
