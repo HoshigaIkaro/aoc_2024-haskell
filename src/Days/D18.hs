@@ -1,9 +1,8 @@
+{-# OPTIONS_GHC -Wno-x-partial #-}
+
 module Days.D18 (run, part1, part2) where
 
-import Control.Arrow
 import Data.Char
-import Data.Map (Map)
-import Data.Map qualified as M
 import Data.Maybe
 import Data.Set (Set)
 import Data.Set qualified as S
@@ -16,94 +15,74 @@ run = do
 
 type Point = (Int, Int)
 
-pInput :: String -> Map Point Int
-pInput = M.fromList . map f . zip [1 ..] . lines
+pInput :: String -> [Point]
+pInput = map f . lines
   where
-    f (time, s) =
+    f s =
         let x = takeWhile isDigit s
             y = drop (length x + 1) s
-         in ((read y, read x), time)
+         in (read y, read x)
 
-initialMap :: Point -> Map Point (Maybe Int)
-initialMap (height, width) = M.fromList $ map (,Nothing) $ concatMap f [0 .. height - 1]
+initialMapSet :: Point -> Set Point
+initialMapSet (height, width) = S.fromList $ concatMap f [0 .. height - 1]
   where
     f r = [(r, c) | c <- [0 .. width - 1]]
 
 adjacentPoints :: Point -> [Point]
 adjacentPoints (r, c) = [(r - 1, c), (r, c - 1), (r, c + 1), (r + 1, c)]
 
-findWaySimp :: Point -> Map Point (Maybe Int) -> [Point]
+findWaySimp :: Point -> Set Point -> Maybe Int
 findWaySimp (height, width) mapping = go [initial] S.empty
   where
-    initial = [(0, 0)]
+    initial = ((0, 0), 0)
     target = (height - 1, width - 1)
-    go :: [[Point]] -> Set Point -> [Point]
-    go [] _ = []
-    go (stateL : ps) visited
+    go [] _ = Nothing
+    go ((point, steps) : ps) visited
         | point `S.member` visited = go ps visited
-        | point == target = stateL
+        | point == target = Just steps
         | otherwise = go (ps <> validAdjacent) newVisited
       where
-        point = head stateL
         newVisited = S.insert point visited
         adjacent = adjacentPoints point
-        f p = p `M.member` mapping
-        validAdjacent = map ((: stateL)) $ filter f adjacent
+        f p = p `S.notMember` visited && p `S.member` mapping
+        validAdjacent = map (,succ steps) $ filter f adjacent
 
-findWay :: Point -> Map Point (Maybe Int) -> Maybe Int -> [Point]
-findWay (height, width) mapping overideTime = go [initial] S.empty
+applyTime :: Int -> [Point] -> Set Point -> Set Point
+applyTime time fallList points = points S.\\ fallen
   where
-    initial = ([(0, 0)], 0)
-    target = (height - 1, width - 1)
-    -- target = (6, 5)
-    -- target = (height, width)
-    go :: [([Point], Int)] -> Set ([Point], Int) -> [Point]
-    go [] _ = []
-    go (state@(pL, time) : ps) visited
-        | state `S.member` visited = go ps visited
-        | point == target = pL
-        | otherwise = go (ps <> validAdjacent) newVisited
-      where
-        point = head pL
-        newVisited = S.insert state visited
-        adjacent = map (,succ time) $ adjacentPoints point
-        f (p, t) = case M.lookup p mapping of
-            Nothing -> False
-            Just mFallTime -> case mFallTime of
-                Nothing -> True
-                Just fallTime -> case overideTime of
-                    Nothing -> t < fallTime
-                    Just oT -> t < fallTime || fallTime >= oT
-        validAdjacent = map (first (: pL)) $ filter f adjacent
+    fallen = S.fromList $ take time fallList
 
-applyTime :: Int -> Map Point (Maybe Int) -> Map Point (Maybe Int)
-applyTime time mapping = M.filter f mapping
-  where
-    f Nothing = True
-    f (Just mT) = mT > time
-
--- part1 :: String -> Int
--- part1 s = findWay size combinedMap (Just 11)
-part1 s = pred $ length $ findWaySimp size $ applyTime 1024 combinedMap
+part1 :: String -> Int
+part1 s = fromJust $ findWaySimp size $ applyTime 1024 fallMap initialMap
   where
     size = (71, 71)
     -- size = (7, 7)
     fallMap = pInput s
-    combinedMap = M.map Just fallMap `M.union` initialMap size
+    initialMap = initialMapSet size
 
-findFirstBlocking :: Point -> Map Point (Maybe Int) -> Point
-findFirstBlocking size mapping = go 1
+findFirstBlocking :: Point -> [Point] -> Set Point -> Point
+findFirstBlocking size fallList mapping = go (1, length fallList)
   where
-    go time
-        | null $ findWaySimp size appliedMapping = head $ M.keys $ M.filter ((== time) . fromMaybe 0) mapping
-        | otherwise = go $ succ time
+    go (l, r)
+        | l == r = currentRemoved
+        | isNothing $ findWaySimp size currentMapping =
+            case findWaySimp size (S.insert currentRemoved currentMapping) of
+                Nothing -> go (l, time)
+                _ -> currentRemoved
+        | otherwise = go (time, r)
       where
-        appliedMapping = applyTime time mapping
+        time = (l + r) `div` 2
+        toRemove = take time fallList
+        currentRemoved = last toRemove
+        currentMapping = mapping S.\\ S.fromList toRemove
+
+toExpectedCoordinateFormat :: Point -> Point
+toExpectedCoordinateFormat = (,) <$> snd <*> fst
 
 part2 :: String -> Point
-part2 s = ((,) <$> snd <*> fst) $ findFirstBlocking size combinedMap
-    where
-        size = (71, 71)
-        -- size = (7, 7)
-        fallMap = pInput s
-        combinedMap = M.map Just fallMap `M.union` initialMap size
+part2 s = toExpectedCoordinateFormat $ findFirstBlocking size fallList mapping
+  where
+    size = (71, 71)
+    -- size = (7, 7)
+    fallList = pInput s
+    mapping = initialMapSet size
