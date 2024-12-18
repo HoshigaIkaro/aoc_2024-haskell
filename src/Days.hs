@@ -21,6 +21,7 @@ import Days.D14 qualified as D14
 import Days.D15 qualified as D15
 import Days.D16 qualified as D16
 import Days.D17 qualified as D17
+import Days.D18 qualified as D18
 
 runDay :: Int -> IO ()
 runDay day = case day of
@@ -41,4 +42,5 @@ runDay day = case day of
     15 -> D15.run
     16 -> D16.run
     17 -> D17.run
+    18 -> D18.run
     _ -> pure ()
