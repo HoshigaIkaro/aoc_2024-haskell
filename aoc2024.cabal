@@ -83,6 +83,7 @@ library
         Days.D16
         Days.D17
         Days.D18
+        Days.D19
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -97,6 +98,8 @@ library
                     , deepseq
                     , mtl
                     , heaps
+                    , MemoTrie
+                    -- , memoize 
 
     -- Directories containing source files.
     hs-source-dirs:   src
