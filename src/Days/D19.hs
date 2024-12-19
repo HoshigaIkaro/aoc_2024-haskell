@@ -48,7 +48,7 @@ findPaths patterns cache target
     dropPrefix = flip drop target . length
     -- updateCacheInResult = fst &&& (M.insert target <$> fst <*> snd)
     updateCacheInResult (value, rCache) = (value, M.insert target value rCache)
-    go [] zCache = (0, zCache)
+    go [] wCache = (0, wCache)
     go (x : xs) wCache =
         let (y, vCache) = findPaths patterns wCache x
          in first (y +) $ go xs vCache
