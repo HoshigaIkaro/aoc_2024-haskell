@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-x-partial #-}
 
 module Days.D19 (run, part1, part2) where
 
 import Control.Arrow
-import Control.Concurrent (setNumCapabilities)
 import Data.List
 import Data.Map (Map)
 import Data.Map qualified as M
@@ -11,7 +11,6 @@ import Data.Text qualified as T
 
 run :: IO ()
 run = do
-    setNumCapabilities 32
     input <- readFile "input/d19.txt"
     print $ part1 input
     print $ part2 input
@@ -29,7 +28,7 @@ isPossible patterns target
     | null prefixes = False
     | otherwise = any (isPossible patterns) newTargets
   where
-    prefixes = filter (flip isPrefixOf target) patterns
+    prefixes = filter (`isPrefixOf` target) patterns
     newTargets = map (flip drop target . length) prefixes
 
 part1 :: String -> Int
@@ -37,17 +36,18 @@ part1 s = length $ filter (isPossible patterns) towels
   where
     (patterns, towels) = pInput s
 
-
 findPaths :: [String] -> Map String Int -> String -> (Int, Map String Int)
 findPaths patterns cache target
     | target == "" = (1, cache)
     | otherwise =
         case M.lookup target cache of
             Just v -> (v, cache)
-            Nothing ->
-                let (v, oCache) = go (map (flip drop target . length) $ filter (flip isPrefixOf target) patterns) cache
-                 in (v, M.insert target v oCache)
+            Nothing -> updateCacheInResult $ go (map dropPrefix validPrefixes) cache
   where
+    validPrefixes = filter (`isPrefixOf` target) patterns
+    dropPrefix = flip drop target . length
+    -- updateCacheInResult = fst &&& (M.insert target <$> fst <*> snd)
+    updateCacheInResult (value, rCache) = (value, M.insert target value rCache)
     go [] zCache = (0, zCache)
     go (x : xs) wCache =
         let (y, vCache) = findPaths patterns wCache x
