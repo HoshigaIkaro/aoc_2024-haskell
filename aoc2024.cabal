@@ -84,6 +84,7 @@ library
         Days.D17
         Days.D18
         Days.D19
+        Days.D20
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -98,7 +99,7 @@ library
                     , deepseq
                     , mtl
                     , heaps
-                    , MemoTrie
+                    -- , MemoTrie
                     -- , memoize 
 
     -- Directories containing source files.
