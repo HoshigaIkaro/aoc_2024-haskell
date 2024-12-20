@@ -99,6 +99,8 @@ library
                     , deepseq
                     , mtl
                     , heaps
+                    , vty
+                    , vty-crossplatform
                     -- , MemoTrie
                     -- , memoize 
 

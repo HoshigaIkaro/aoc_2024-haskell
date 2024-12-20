@@ -53,8 +53,8 @@ adjacentPoints (r, c) = [(r - 1, c), (r, c - 1), (r, c + 1), (r + 1, c)]
 validPoints :: Map Point a -> Point -> [Point]
 validPoints mapping = filter (`M.member` mapping) . adjacentPoints
 
-fPathLen :: Map Point Char -> Point -> Point -> [Point]
-fPathLen mapping start end = reverse $ go [[start]] S.empty
+findPath :: Map Point Char -> Point -> Point -> [Point]
+findPath mapping start end = reverse $ go [[start]] S.empty
   where
     go [] _ = []
     go (stateL : xs) visited
@@ -97,7 +97,7 @@ part1 s = length $ cheatPairssOver validDistV1 originalTime 100 original
     start = bStart b
     end = bEnd b
     mapping = bMap b
-    original = fPathLen mapping start end
+    original = findPath mapping start end
     originalTime = length original
 
 part2 :: String -> Int
@@ -107,5 +107,5 @@ part2 s = length $ cheatPairssOver validDistV2 originalTime 100 original
     start = bStart b
     end = bEnd b
     mapping = bMap b
-    original = fPathLen mapping start end
+    original = findPath mapping start end
     originalTime = length original
