@@ -5,6 +5,14 @@ module Days (
 ) where
 
 import Days.D1 qualified as D1
+import Days.D2 qualified as D2
+import Days.D3 qualified as D3
+import Days.D4 qualified as D4
+import Days.D5 qualified as D5
+import Days.D6 qualified as D6
+import Days.D7 qualified as D7
+import Days.D8 qualified as D8
+import Days.D9 qualified as D9
 import Days.D10 qualified as D10
 import Days.D11 qualified as D11
 import Days.D12 qualified as D12
@@ -15,18 +23,12 @@ import Days.D16 qualified as D16
 import Days.D17 qualified as D17
 import Days.D18 qualified as D18
 import Days.D19 qualified as D19
-import Days.D2 qualified as D2
 import Days.D20 qualified as D20
-import Days.D3 qualified as D3
-import Days.D4 qualified as D4
-import Days.D5 qualified as D5
-import Days.D6 qualified as D6
-import Days.D7 qualified as D7
-import Days.D8 qualified as D8
-import Days.D9 qualified as D9
-import Graphics.Vty (Vty (nextEvent), VtyUserConfig (VtyUserConfig), defaultConfig)
-import Graphics.Vty.CrossPlatform (mkVty)
-import Graphics.Vty.Input
+import Days.D21 qualified as D21
+
+-- import Graphics.Vty (Vty (nextEvent), VtyUserConfig (VtyUserConfig), defaultConfig)
+-- import Graphics.Vty.CrossPlatform (mkVty)
+-- import Graphics.Vty.Input
 
 runDay :: Int -> IO ()
 runDay day = case day of
@@ -50,14 +52,15 @@ runDay day = case day of
     18 -> D18.run
     19 -> D19.run
     20 -> D20.run
+    21 -> D21.run
     _ -> pure ()
 
-testInteractive :: IO ()
-testInteractive = do
-    vty <- mkVty defaultConfig
-    e <- nextEvent vty
-    print e
-    case e of
-        EvKey key _ -> print key
-        _ -> testInteractive
-    pure ()
+-- testInteractive :: IO ()
+-- testInteractive = do
+--     vty <- mkVty defaultConfig
+--     e <- nextEvent vty
+--     print e
+--     case e of
+--         EvKey key _ -> print key
+--         _ -> testInteractive
+--     pure ()
