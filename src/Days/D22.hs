@@ -4,12 +4,10 @@ import Control.Concurrent (setNumCapabilities)
 import Control.Parallel (par, pseq)
 import Control.Parallel.Strategies (parMap, rpar)
 import Data.Bits
-import Data.Containers.ListUtils (nubOrd, nubOrdOn)
-import Data.Function
+import Data.Containers.ListUtils (nubOrdOn)
 import Data.List (zip5)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as M
-import Data.Maybe (fromMaybe)
 
 run :: IO ()
 run = do
