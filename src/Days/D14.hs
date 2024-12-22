@@ -194,7 +194,7 @@ part2 s = findIntersection size $ findOutlierTimesInCycle size $ pInput s
     -- \| original check for tree
     rowExists = rowInPoints 7 size
     go time f lst
-        | f points && time /= 0 = time
+        | f points && time /= (0 :: Int) = time
         | otherwise = go (time + 1) f new
       where
         points = map fst lst

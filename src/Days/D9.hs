@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
+
 module Days.D9 (run, part1, part2) where
 
 import Control.Arrow
