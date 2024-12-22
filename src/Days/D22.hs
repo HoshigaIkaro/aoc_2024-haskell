@@ -1,13 +1,15 @@
 module Days.D22 (run, part1, part2) where
 
 import Control.Concurrent (setNumCapabilities)
-import Control.Parallel ( par, pseq )
+import Control.Parallel (par, pseq)
 import Control.Parallel.Strategies (parMap, rpar)
 import Data.Bits
+import Data.Containers.ListUtils (nubOrd, nubOrdOn)
+import Data.Function
 import Data.List (zip5)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as M
-import Data.Maybe ( fromMaybe )
+import Data.Maybe (fromMaybe)
 
 run :: IO ()
 run = do
@@ -51,10 +53,13 @@ prepareSequencesForMap = foldr f []
   where
     f (a, b, c, d, e) = (((b - a, c - b, d - c, e - d), e) :)
 
+-- createMapping :: [((Int, Int, Int, Int), Int)] -> Map (Int, Int, Int, Int) Int
+-- createMapping = foldr f M.empty . reverse
+--   where
+--     f (key, value) = M.alter (Just . fromMaybe value) key
+
 createMapping :: [((Int, Int, Int, Int), Int)] -> Map (Int, Int, Int, Int) Int
-createMapping = foldr f M.empty . reverse
-  where
-    f (key, value) = M.alter (Just . fromMaybe value) key
+createMapping = M.fromList . nubOrdOn fst
 
 combineP :: [Map (Int, Int, Int, Int) Int] -> Map (Int, Int, Int, Int) Int
 combineP [] = M.empty
