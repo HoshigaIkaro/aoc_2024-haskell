@@ -3,7 +3,7 @@
 module Days.D23 (run, part1, part2) where
 
 import Control.Monad
-import Data.Char (isAlpha, isDigit)
+import Data.Char (isAlpha)
 import Data.Containers.ListUtils (nubOrdOn)
 import Data.List
 import Data.Map (Map)
@@ -40,8 +40,11 @@ toGraph = foldr f M.empty
   where
     f (a, b) = M.alter (Just . maybe [a] (a :)) b . M.alter (Just . maybe [b] (b :)) a
 
+uniqueNodeSet :: [(Text, Text, Text)] -> [(Text, Text, Text)]
+uniqueNodeSet = nubOrdOn (\(x, y, z) -> S.fromList [x, y, z])
+
 findCompleteThreeFor :: Map Text [Text] -> Text -> [(Text, Text, Text)]
-findCompleteThreeFor mapping a = nubOrdOn (\(x, y, z) -> S.fromList [x, y, z]) $ go (mapping M.! a) (S.singleton a)
+findCompleteThreeFor mapping a = uniqueNodeSet $ go (mapping M.! a) (S.singleton a)
   where
     go [] _ = []
     go (b : bs) visited =
@@ -49,7 +52,10 @@ findCompleteThreeFor mapping a = nubOrdOn (\(x, y, z) -> S.fromList [x, y, z]) $
          in [(a, b, c) | c <- cs] <> go bs visited
 
 part1 :: String -> Int
-part1 s = length $ nubOrdOn (\(a, b, c) -> S.fromList [a, b, c]) $ filter atLeastOneT $ concatMap (findCompleteThreeFor g) nodes
+part1 s =
+    length $
+        uniqueNodeSet $
+            concatMap (filter atLeastOneT . findCompleteThreeFor g) nodes
   where
     g = toGraph $ pInputToList s
     nodes = M.keys g
@@ -69,7 +75,12 @@ allConnectedStartingWith mapping start = go [start] S.empty S.empty
         possible = filter (`S.notMember` newVisited) $ mapping M.! x
 
 part2 :: String -> Text
-part2 s = T.intercalate "," $ sort $ S.toList $ maximumBy largestSize $ map (allConnectedStartingWith g) nodes
+part2 s =
+    T.intercalate "," $
+        sort $
+            S.toList $
+                maximumBy largestSize $
+                    map (allConnectedStartingWith g) nodes
   where
     g = toGraph $ pInputToList s
     nodes = M.keys g
