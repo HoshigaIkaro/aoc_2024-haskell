@@ -49,12 +49,12 @@ nubByNodeSet :: [(Text, Text, Text)] -> [(Text, Text, Text)]
 nubByNodeSet = nubOrdOn (\(x, y, z) -> S.fromList [x, y, z])
 
 findCompleteThreeFor :: Map Text [Text] -> Text -> [(Text, Text, Text)]
-findCompleteThreeFor mapping a = go (mapping M.! a) (S.singleton a)
+findCompleteThreeFor mapping a = go (mapping M.! a)
   where
-    go [] _ = []
-    go (b : bs) visited =
+    go [] = []
+    go (b : bs)  =
         let cs = [c | c <- mapping M.! b, c `elem` mapping M.! a]
-         in [(a, b, c) | c <- cs] <> go bs visited
+         in [(a, b, c) | c <- cs] <> go bs
 
 part1 :: String -> Int
 part1 s =
