@@ -52,7 +52,7 @@ findCompleteThreeFor :: Map Text [Text] -> Text -> [(Text, Text, Text)]
 findCompleteThreeFor mapping a = go (mapping M.! a)
   where
     go [] = []
-    go (b : bs)  =
+    go (b : bs) =
         let cs = [c | c <- mapping M.! b, c `elem` mapping M.! a]
          in [(a, b, c) | c <- cs] <> go bs
 
