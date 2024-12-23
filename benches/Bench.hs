@@ -12,6 +12,7 @@ import Days.D8 qualified as D8
 import Days.D10 qualified as D10
 import Days.D11 qualified as D11
 import Days.D12 qualified as D12
+import Days.D23 qualified as D23
 
 main :: IO ()
 main = do
@@ -20,6 +21,7 @@ main = do
     inputD10 <- readFile "input/d10.txt"
     inputD11 <- readFile "input/d11.txt"
     inputD12 <- readFile "input/d12.txt"
+    inputD23 <- readFile "input/d23.txt"
     defaultMain
         [ 
         --     bgroup
@@ -49,9 +51,14 @@ main = do
         --     [ bench "part 1" $ nf D11.part1 inputD11
         --     , bench "part 2" $ nf D11.part2 inputD11
         --     ],
+        -- bgroup
+        --     "day 12"
+        --     [ bench "part 1" $ nf D12.part1 inputD12
+        --     , bench "part 2" $ nf D12.part2 inputD12
+        --     ]
         bgroup
-            "day 12"
-            [ bench "part 1" $ nf D12.part1 inputD12
-            , bench "part 2" $ nf D12.part2 inputD12
+            "day 23"
+            [ bench "part 1" $ nf D23.part1 inputD23
+            , bench "part 2" $ nf D23.part2 inputD23
             ]
         ]
