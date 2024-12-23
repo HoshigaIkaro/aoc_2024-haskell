@@ -6,8 +6,8 @@ import Control.Monad (void)
 import Data.Char (isAlpha)
 import Data.Containers.ListUtils (nubOrdOn)
 import Data.List (maximumBy, sort)
-import Data.Map (Map)
-import Data.Map qualified as M
+import Data.Map.Strict (Map)
+import Data.Map.Strict qualified as M
 import Data.Maybe (fromJust)
 import Data.Set (Set)
 import Data.Set qualified as S
