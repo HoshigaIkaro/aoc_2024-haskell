@@ -60,11 +60,11 @@ part1 :: String -> Int
 part1 s =
     length $
         nubByNodeSet $
-            concatMap (filter atLeastOneT . findCompleteThreeFor g) nodes
+            concatMap (filter atLeastOneStartsWithT . findCompleteThreeFor g) nodes
   where
     g = toGraph $ pInputToList s
     nodes = M.keys g
-    atLeastOneT (a, b, c) = any ("t" `T.isPrefixOf`) [a, b, c]
+    atLeastOneStartsWithT (a, b, c) = any ("t" `T.isPrefixOf`) [a, b, c]
 
 allConnectedStartingWith :: Map Text [Text] -> Text -> Set Text
 allConnectedStartingWith mapping start = go [start] S.empty S.empty
