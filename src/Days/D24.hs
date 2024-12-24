@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-unused-local-binds #-}
+{-# OPTIONS_GHC -Wno-unused-imports #-}
 
 module Days.D24 (run, part1, part2) where
 
@@ -76,7 +77,7 @@ pInput = fromJust . parseMaybe go . T.pack
 compute :: Gate -> Int -> Int -> Int
 compute AND = (.&.)
 compute OR = (.|.)
-compute XOR = (xor)
+compute XOR = xor
 
 findValue :: Map Text Int -> Map Text (Gate, Text, Text) -> Text -> (Int, Map Text Int)
 findValue mapping outputMap target = case M.lookup target mapping of
@@ -160,7 +161,7 @@ nodes mapping = go (M.keys mapping) S.empty
                     AND -> andColor
                     OR -> orColor
                     XOR -> xorColor
-                d = if "z" `T.isPrefixOf` key then [Rank SinkRank] else []
+                d = [Rank SinkRank | "z" `T.isPrefixOf` key]
              in DotNode key (c : d) : go (inputA : inputB : rest) (S.insert key visited)
 
 edges :: Map Text (Gate, Text, Text) -> [DotEdge Text]
