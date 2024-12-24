@@ -88,6 +88,7 @@ library
         Days.D21
         Days.D22
         Days.D23
+        Days.D24
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -104,6 +105,8 @@ library
                     , heaps
                     , vty
                     , vty-crossplatform
+                    , random
+                    , graphviz
                     -- , MemoTrie
                     -- , memoize 
 
