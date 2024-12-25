@@ -28,6 +28,7 @@ import Days.D21 qualified as D21
 import Days.D22 qualified as D22
 import Days.D23 qualified as D23
 import Days.D24 qualified as D24
+import Days.D25 qualified as D25
 
 -- import Graphics.Vty (Vty (nextEvent), VtyUserConfig (VtyUserConfig), defaultConfig)
 -- import Graphics.Vty.CrossPlatform (mkVty)
@@ -59,6 +60,7 @@ runDay day = case day of
     22 -> D22.run
     23 -> D23.run
     24 -> D24.run
+    25 -> D25.run
     _ -> pure ()
 
 -- testInteractive :: IO ()
