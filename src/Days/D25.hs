@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-x-partial #-}
+
 module Days.D25 (run, part1, part2) where
 
 import Data.List

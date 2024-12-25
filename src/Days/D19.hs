@@ -3,7 +3,6 @@
 
 module Days.D19 (run, part1, part2) where
 
-import Control.Arrow
 import Control.Monad.State.Strict
 import Data.List
 import Data.Map.Strict (Map)
