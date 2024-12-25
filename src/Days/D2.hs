@@ -1,5 +1,8 @@
 module Days.D2 (run, part1, part2) where
 
+import Data.Either (rights)
+import Data.Text qualified as T
+import Data.Text.Read qualified as T
 import GHC.Arr (inRange)
 
 run :: IO ()
@@ -20,7 +23,10 @@ isSafe a = (allDecreasing pairs || allIncreasing pairs) && adjacentDiffValid pai
     adjacentDiffValid = all (inRange (1, 3) . abs . uncurry (-))
 
 numSafeWith :: ([Int] -> Bool) -> String -> Int
-numSafeWith f = length . filter id . map (f . map read . words) . lines
+numSafeWith func = length . filter id . map applyFuncOnLine . T.lines . T.pack
+  where
+    toInts = map fst . rights . map T.decimal . T.words
+    applyFuncOnLine = func . toInts
 
 part1 :: String -> Int
 part1 = numSafeWith isSafe

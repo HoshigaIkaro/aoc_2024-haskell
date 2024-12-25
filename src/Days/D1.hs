@@ -19,7 +19,7 @@ run = do
     print $ part2 input
 
 pToList :: String -> [[Int]]
-pToList = transpose . map (map fst . rights . map (T.decimal) . T.words) . T.lines . T.pack
+pToList = transpose . map (map fst . rights . map T.decimal . T.words) . T.lines . T.pack
 
 listPairToTuple :: [[Int]] -> ([Int], [Int])
 listPairToTuple = liftA2 (,) head (!! 1)
