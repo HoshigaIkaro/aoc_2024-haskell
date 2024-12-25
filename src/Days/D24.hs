@@ -127,6 +127,7 @@ toValueMapFor lst c = go $ zip [0 ..] lst
 testMachineFor :: Map Text (Gate, Text, Text) -> Int -> Int -> Bool
 testMachineFor machine numOutputBits zNum = go 50 (mkStdGen 1)
   where
+    go :: Int -> StdGen -> Bool
     go 0 _ = True
     go n gen1 =
         let (x, gen2) = uniformR (0, (1 .<<. (numOutputBits - 1)) - 1) gen1

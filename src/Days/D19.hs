@@ -65,13 +65,13 @@ findPaths patterns target
             Just v -> pure v
             Nothing -> do
                 let validPrefixes = filter (`isPrefixOf` target) patterns
-                    newTargets = map (flip drop target . length) $ validPrefixes
+                    newTargets = map (flip drop target . length) validPrefixes
                 v <- sum <$> mapM (findPaths patterns) newTargets
                 modify (M.insert target v)
                 pure v
 
 part2 :: String -> Int
-part2 s = sum $ evalState (sequenceA $ map (findPaths patterns) towels) M.empty
+part2 s = sum $ evalState (traverse (findPaths patterns) towels) M.empty
   where
     (patterns, towels) = pInput s
 

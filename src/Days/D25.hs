@@ -49,10 +49,10 @@ nonOverlaps obj1 obj2 = case (obj1, obj2) of
 numKeysFitLock :: Object -> [Object] -> Int
 numKeysFitLock lock = length . filter (nonOverlaps lock)
 
--- part1 :: String -> Int
-part1 s = sum $ map (flip numKeysFitLock keys) locks
-    where
-        (locks, keys) = separateObjects $ pInput s
+part1 :: String -> Int
+part1 s = sum $ map (`numKeysFitLock` keys) locks
+  where
+    (locks, keys) = separateObjects $ pInput s
 
 part2 :: String -> Int
-part2 s = 0
+part2 _ = 0
