@@ -16,16 +16,16 @@ type Parser = Parsec Void Text
 
 run :: IO ()
 run = do
-  input <- readFile "input/d7.txt"
-  print $ part1 input
-  print $ part2 input
+    input <- readFile "input/d7.txt"
+    print $ part1 input
+    print $ part2 input
 
 pLine :: Parser (Int, [Int])
 pLine = do
-  num <- L.decimal
-  void $ string ": "
-  values <- sepBy L.decimal space
-  pure (num, values)
+    num <- L.decimal
+    void $ string ": "
+    values <- sepBy L.decimal space
+    pure (num, values)
 
 pInput :: Text -> [(Int, [Int])]
 pInput = map (fromJust . parseMaybe pLine) . T.lines
@@ -36,12 +36,12 @@ isPossible ops current target (x : xs) = any (\op -> isPossible ops (current `op
 
 part1 :: String -> Int
 part1 = sum . map fst . filter (uncurry (isPossible operators 0)) . pInput . T.pack
- where
-  operators = [(+), (*)]
+  where
+    operators = [(+), (*)]
 
 part2 :: String -> Int
 part2 = sum . map fst . filter (uncurry (isPossible operators 0)) . pInput . T.pack
- where
-  l = succ . floorDoubleInt . logBase 10 . fromIntegral
-  f a b = a * (10 ^ l b) + b
-  operators = [(+), (*), f]
+  where
+    l = succ . floorDoubleInt . logBase 10 . fromIntegral
+    f a b = a * (10 ^ l b) + b
+    operators = [(+), (*), f]
