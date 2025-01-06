@@ -7,7 +7,8 @@ import Data.Char (digitToInt)
 import Data.IntMap.Strict (IntMap)
 import Data.IntMap.Strict qualified as M
 import Data.List
-import Data.Sequence (Seq, ViewL (..), ViewR (..), (<|))
+import Data.Maybe (fromJust, isNothing)
+import Data.Sequence (Seq (..), (<|), (|>))
 import Data.Sequence qualified as S
 import Data.Text qualified as T
 
@@ -53,19 +54,15 @@ pToSeq = go 0 . takeWhile (/= '\n')
          in idSeq <> freeSeq <> go (currentId + 1) rest
 
 moveAllV2S :: Seq (Maybe Int) -> Seq Int
-moveAllV2S = go
-  where
-    go s
-        | S.null s = S.empty
-        | otherwise = case S.viewl s of
-            S.EmptyL -> S.empty
-            mVal :< rest -> case mVal of
-                Just v -> v <| go rest
-                Nothing -> case S.viewr rest of
-                    S.EmptyR -> S.empty
-                    restR :> mValR -> case mValR of
-                        Just v -> v <| go restR
-                        Nothing -> go (mVal <| restR)
+moveAllV2S S.Empty = S.Empty
+-- current left end is part of a file
+moveAllV2S ((Just v) :<| rest) = v <| moveAllV2S rest
+-- current left end is free space
+moveAllV2S (Nothing :<| rest) = case rest of
+    S.Empty -> S.empty
+    restR :|> mValR -> case mValR of
+        Just v -> v <| moveAllV2S restR
+        Nothing -> moveAllV2S (Nothing <| S.dropWhileR isNothing restR)
 
 moveAll :: IntMap Int -> Int -> IntMap Int
 moveAll mapping maxIndex = case tryMoveOne mapping maxIndex of
