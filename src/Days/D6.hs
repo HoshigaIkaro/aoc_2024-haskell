@@ -3,6 +3,9 @@
 module Days.D6 (run, part1, part2) where
 
 import Control.Arrow
+import Control.Concurrent (setNumCapabilities)
+import Control.Parallel.Strategies
+import Data.Containers.ListUtils
 import Data.Ix (Ix (inRange))
 import Data.List
 import Data.Maybe
@@ -11,6 +14,7 @@ import Data.Set qualified as S
 
 run :: IO ()
 run = do
+    setNumCapabilities 32
     input <- readFile "input/d6.txt"
     print $ part1 input
     print $ part2 input
@@ -70,23 +74,26 @@ nextDir RIGHT = DOWN
 nextDir DOWN = LEFT
 nextDir LEFT = UP
 
-moveGuardUntilLeave :: Board -> Set (Point, Direction)
-moveGuardUntilLeave b = go direction position S.empty
+moveGuardUntilLeave :: Board -> [(Point, Direction)]
+moveGuardUntilLeave b = go direction position
   where
     width = bWidth b
     height = bHeight b
     walls = bWalls b
     (position, direction) = bGuard b
     inBounds (row, col) = inRange (0, height - 1) row && inRange (0, width - 1) col
-    go dir point visited
-        | not (inBounds point) = visited
-        | newPoint `elem` walls = go (nextDir dir) point (S.insert (point, dir) visited)
-        | otherwise = go dir newPoint (S.insert (point, dir) visited)
+    go dir point
+        | not (inBounds point) = []
+        | otherwise = (point, dir) : go newDir newPoint
       where
-        newPoint = getMove dir point
+        afterMove = getMove dir point
+        (newPoint, newDir) =
+            if afterMove `elem` walls
+                then (point, nextDir dir)
+                else (afterMove, dir)
 
 part1 :: String -> Int
-part1 = S.size . moveGuardUntilLeave . pInput
+part1 = S.size . S.fromList . map fst . moveGuardUntilLeave . pInput
 
 nextWall :: Walls -> Point -> Direction -> Maybe Point
 nextWall walls (row, col) dir
@@ -99,19 +106,21 @@ nextWall walls (row, col) dir
 nextPoint :: Walls -> Point -> Direction -> Maybe Point
 nextPoint walls point dir = getOppositeMove dir <$> nextWall walls point dir
 
-isLoop :: Set (Point, Direction) -> Point -> Direction -> Walls -> Maybe Bool
+isLoop :: Set (Point, Direction) -> Point -> Direction -> Walls -> Bool
 isLoop visited point dir walls = do
     let newDir = nextDir dir
-    newPoint <- nextPoint walls point dir
-    let newState = (newPoint, newDir)
-    if newState `S.member` visited
-        then pure True
-        else isLoop (S.insert newState visited) newPoint newDir walls
+    case nextPoint walls point dir of
+        Nothing -> False
+        Just newPoint ->
+            let newState = (newPoint, newDir)
+             in if newState `S.member` visited
+                    then True
+                    else isLoop (S.insert newState visited) newPoint newDir walls
 
 part2 :: String -> Int
-part2 s = length $ filter (fromMaybe False . isLoop S.empty point dir) newWallSets
+part2 s = length . filter id $ parMap rpar (isLoop S.empty point dir) newWallSets
   where
     b = pInput s
     (point, dir) = bGuard b
     movementPointsAndDir = moveGuardUntilLeave b
-    newWallSets = S.toList $ S.map (\(p, d) -> S.insert (getMove d p) (bWalls b)) movementPointsAndDir
+    newWallSets = map (`S.insert` (bWalls b)) . nubOrd $ map (uncurry (flip getMove)) movementPointsAndDir
