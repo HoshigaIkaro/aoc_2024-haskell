@@ -2,6 +2,7 @@ module Days.D11 (run, part1, part2) where
 
 import Data.IntMap.Strict (IntMap)
 import Data.IntMap.Strict qualified as M
+import GHC.Base (divModInt)
 import GHC.Float (double2Int, int2Double)
 
 run :: IO ()
@@ -21,8 +22,8 @@ evolve = foldr f M.empty . M.toList
     f (x, numX) acc
         | x == 0 = alterFunc 1 numX acc
         | even lb =
-            let one = alterFunc (x `div` (10 ^ mid)) numX acc
-             in alterFunc (x `mod` (10 ^ mid)) numX one
+            let (dv, md) = divModInt x (10 ^ mid)
+             in alterFunc md numX $ alterFunc dv numX acc
         | otherwise = alterFunc (2024 * x) numX acc
       where
         lb = 1 + double2Int (logBase 10 (int2Double x))
