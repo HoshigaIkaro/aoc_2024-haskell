@@ -7,6 +7,8 @@ import Data.Char (digitToInt)
 import Data.IntMap.Strict (IntMap)
 import Data.IntMap.Strict qualified as M
 import Data.List
+import Data.Sequence (Seq, ViewL (..), ViewR (..), (<|))
+import Data.Sequence qualified as S
 import Data.Text qualified as T
 
 run :: IO ()
@@ -37,6 +39,34 @@ tryMoveOne mapping currentMaxIndex = do
         newMaxIndex = until (`M.member` newMapping) pred currentMaxIndex
     pure (newMapping, newMaxIndex)
 
+pToSeq :: String -> Seq (Maybe Int)
+pToSeq = go 0 . takeWhile (/= '\n')
+  where
+    go _ [] = S.empty
+    go currentId [x] = S.replicate (digitToInt x) (Just currentId)
+    go currentId (x : y : rest) =
+        let fileLength = digitToInt x
+            freeSpace = digitToInt y
+            idSeq :: Seq (Maybe Int)
+            idSeq = S.replicate fileLength (Just currentId)
+            freeSeq = S.replicate freeSpace Nothing
+         in idSeq <> freeSeq <> go (currentId + 1) rest
+
+moveAllV2S :: Seq (Maybe Int) -> Seq Int
+moveAllV2S = go
+  where
+    go s
+        | S.null s = S.empty
+        | otherwise = case S.viewl s of
+            S.EmptyL -> S.empty
+            mVal :< rest -> case mVal of
+                Just v -> v <| go rest
+                Nothing -> case S.viewr rest of
+                    S.EmptyR -> S.empty
+                    restR :> mValR -> case mValR of
+                        Just v -> v <| go restR
+                        Nothing -> go (mVal <| restR)
+
 moveAll :: IntMap Int -> Int -> IntMap Int
 moveAll mapping maxIndex = case tryMoveOne mapping maxIndex of
     Nothing -> mapping
@@ -49,10 +79,10 @@ showIds :: IntMap Int -> String
 showIds = concatMap (show . snd) . sort . M.toList
 
 part1 :: String -> Int
-part1 s = calculateCheckSum $ moveAll b maxIndex
+part1 = calculateCheckSumVS . moveAllV2S . pToSeq
   where
-    b = pInput s
-    maxIndex = maximum (M.keys b)
+    calculateCheckSumVS = S.foldrWithIndex f 0
+    f idx currentId accumulated = idx * currentId + accumulated
 
 findFittingFreeSpace :: IntMap Int -> Int -> Int -> Maybe [Int]
 findFittingFreeSpace = go 0
@@ -91,6 +121,7 @@ moveAllV2 originalMapping = go (reverse [0 .. maxId]) originalMapping
 
 part2 :: String -> Int
 part2 = calculateCheckSum . moveAllV2 . pInput
+-- part2 = const 0
 
 pPairs :: String -> [(Int, Int)]
 pPairs = map ((f *** f) . T.splitAt 1) . T.chunksOf 2 . T.pack
