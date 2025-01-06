@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wno-x-partial #-}
+{-# OPTIONS_GHC -feager-blackholing #-}
 
 module Days.D6 (run, part1, part2) where
 
