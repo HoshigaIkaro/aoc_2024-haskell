@@ -32,7 +32,9 @@ pInput = map (fromJust . parseMaybe pLine) . T.lines
 
 isPossible :: [Int -> Int -> Int] -> Int -> Int -> [Int] -> Bool
 isPossible _ current target [] = target == current
-isPossible ops current target (x : xs) = any (\op -> isPossible ops (current `op` x) target xs) ops
+isPossible ops current target (x : xs)
+    | current > target = False
+    | otherwise = any (\op -> isPossible ops (current `op` x) target xs) ops
 
 part1 :: String -> Int
 part1 = sum . map fst . filter (uncurry (isPossible operators 0)) . pInput . T.pack
