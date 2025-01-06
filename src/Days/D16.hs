@@ -5,10 +5,13 @@ module Days.D16 (run, part1, part2) where
 import Control.Arrow
 import Data.Heap (Heap)
 import Data.Heap qualified as H
+-- import Data.IntMap.Strict (IntMap)
+-- import Data.IntMap.Strict qualified as IM
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as M
 import Data.Set (Set)
 import Data.Set qualified as S
+import Linear.V2
 
 run :: IO ()
 run = do
@@ -16,7 +19,8 @@ run = do
     print $ part1 input
     print $ part2 input
 
-type Point = (Int, Int)
+-- type Point = (Int, Int)
+type Point = V2 Int
 
 data Board = Board
     { bWalls :: Set Point
@@ -38,7 +42,7 @@ pBoard s =
         }
   where
     ls = lines s
-    allPointsInRow row = [(row, col) | col <- [0 ..]]
+    allPointsInRow row = [V2 row col | col <- [0 ..]]
     f row = zip (allPointsInRow row)
     mapping = M.fromList . concat $ zipWith f [0 ..] ls
     walls = S.fromList . M.keys $ M.filter (== '#') mapping
@@ -50,7 +54,7 @@ pBoard s =
 data Direction = UP | DOWN | LEFT | RIGHT deriving (Show, Eq, Ord)
 
 adjacentPoints :: Point -> [(Point, Direction)]
-adjacentPoints (r, c) = [((r - 1, c), UP), ((r, c - 1), LEFT), ((r, c + 1), RIGHT), ((r + 1, c), DOWN)]
+adjacentPoints (V2 r c) = [(V2 (r - 1) c, UP), (V2 r (c - 1), LEFT), (V2 r (c + 1), RIGHT), (V2 (r + 1) c, DOWN)]
 
 validDirChange :: Direction -> [Direction]
 validDirChange dir
@@ -78,7 +82,10 @@ findBestPathAndScore b = go initialHeap S.empty
         state@(point, dir) = head stateL
         newHeap = H.deleteMin heap
         f s = incScorFunc dir s score
-        newStates = H.fromList $ map (H.Entry <$> f <*> (: stateL)) $ validAdjacentStates mapping visited state
+        newStates =
+            H.fromList $
+                map (H.Entry <$> f <*> (: stateL)) $
+                    validAdjacentStates mapping visited state
         incScorFunc originalDir (_, newDir)
             | originalDir == newDir = succ
             | otherwise = (+ 1001)

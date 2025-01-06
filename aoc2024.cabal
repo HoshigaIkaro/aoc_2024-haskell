@@ -58,6 +58,11 @@ library
     import:           warnings
 
     ghc-options:    -threaded
+                    -- -fllvm
+                    -ddump-simpl -ddump-to-file
+                    -O2
+                    -- -optc-O3
+                    
 
     -- Modules exported by the library.
     exposed-modules:  
@@ -108,6 +113,12 @@ library
                     , vty-crossplatform
                     , random
                     , graphviz
+                    , comonad
+                    , vector
+                    , repa
+                    , linear
+                    -- , accelerate
+                    -- , accelerate-llvm-ptx
                     -- , MemoTrie
                     -- , memoize 
 
@@ -118,6 +129,10 @@ library
     default-language: GHC2024
 
 benchmark lib-bench
+    ghc-options:
+        -threaded
+        -rtsopts
+
     type:             exitcode-stdio-1.0
 
     hs-source-dirs:   benches
